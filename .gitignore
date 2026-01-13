@@ -1,0 +1,58 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Virtual Environments
+venv/
+.venv/
+env/
+ENV/
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Environment variables
+.env
+
+# Application folders with user data
+downloads/
+uploads/
+
+# External binaries and nested projects
+vibe/
+zoom to text/
+
+# Media files (audio/video)
+*.mp4
+*.mp3
+*.wav
+*.mkv
+*.avi
+*.mov
+*.webm
+*.flv
+
+# Text files (except specific ones)
+*.txt
+!requirements.txt
+!LICENSE.txt
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# SSH keys (NEVER commit these!)
+*.pem
+
+*.env
+
+.env
+*.env
+ (2).env

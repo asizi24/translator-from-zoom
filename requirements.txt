@@ -1,0 +1,9 @@
+flask
+flask-cors
+werkzeug
+yt-dlp
+faster-whisper
+google-generativeai
+python-dotenv
+gunicorn
+apscheduler
