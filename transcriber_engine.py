@@ -88,6 +88,20 @@ class TranscriptionManager:
         download_folder = "downloads"
         os.makedirs(download_folder, exist_ok=True)
         
+        # בדיקת מצב בדיקה - החזרת תוצאה מדומה
+        if test_mode or self.test_mode:
+            logger.info("🧪 Running in TEST MODE - simulating transcription")
+            self._update(task_id, 'downloading', 10, '[TEST] Simulating download...')
+            time.sleep(0.5)
+            self._update(task_id, 'transcribing', 50, '[TEST] Simulating transcription...')
+            time.sleep(0.5)
+            self._update(task_id, 'completed', 100, '[TEST] Done!',
+                         filename='test_output.txt',
+                         text='This is a simulated test transcription.',
+                         summary={'title': 'Test', 'summary': 'Test summary', 'tags': ['test']},
+                         segments=[{'start': 0, 'end': 1, 'text': 'Test segment', 'speaker': 'SPEAKER_00'}])
+            return
+        
         # שלב 1: הורדה
         self._update(task_id, 'downloading', 10, 'Downloading...')
         audio_file = file_path
