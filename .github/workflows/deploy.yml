@@ -44,11 +44,9 @@ jobs:
             git pull origin main
 
             # Create/Update .env file with secrets
-            cat > .env << 'EOF'
-            FLASK_ENV=production
-            HF_TOKEN=${{ secrets.HF_TOKEN }}
-            GOOGLE_API_KEY=${{ secrets.GOOGLE_API_KEY }}
-            EOF
+            echo "FLASK_ENV=production" > .env
+            echo "HF_TOKEN=${{ secrets.HF_TOKEN }}" >> .env
+            echo "GOOGLE_API_KEY=${{ secrets.GOOGLE_API_KEY }}" >> .env
 
             # Pull latest image
             docker-compose pull

@@ -11,6 +11,9 @@ services:
       - ./.env:/app/.env
     env_file:
       - .env
+    environment:
+      - HF_TOKEN=${HF_TOKEN}
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
     expose:
       - "5000"
 
