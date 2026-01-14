@@ -1,0 +1,98 @@
+2026-01-14 08:47:25 [INFO] __main__: Initializing TranscriptionManager...
+2026-01-14 08:48:47 [INFO] __main__: Initializing TranscriptionManager...
+2026-01-14 08:50:22 [INFO] __main__: Initializing TranscriptionManager...
+2026-01-14 08:50:22 [INFO] httpx: HTTP Request: GET https://huggingface.co/api/models/Systran/faster-whisper-base/revision/main "HTTP/1.1 200 OK"
+2026-01-14 08:50:22 [INFO] httpx: HTTP Request: HEAD https://huggingface.co/Systran/faster-whisper-base/resolve/ebe41f70d5b6dfa9166e2c581c45c9c0cfc57b66/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-01-14 08:50:22 [INFO] httpx: HTTP Request: HEAD https://huggingface.co/Systran/faster-whisper-base/resolve/ebe41f70d5b6dfa9166e2c581c45c9c0cfc57b66/tokenizer.json "HTTP/1.1 307 Temporary Redirect"
+2026-01-14 08:50:22 [INFO] httpx: HTTP Request: HEAD https://huggingface.co/Systran/faster-whisper-base/resolve/ebe41f70d5b6dfa9166e2c581c45c9c0cfc57b66/vocabulary.txt "HTTP/1.1 307 Temporary Redirect"
+2026-01-14 08:50:22 [INFO] httpx: HTTP Request: HEAD https://huggingface.co/Systran/faster-whisper-base/resolve/ebe41f70d5b6dfa9166e2c581c45c9c0cfc57b66/model.bin "HTTP/1.1 302 Found"
+2026-01-14 08:50:22 [INFO] httpx: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/Systran/faster-whisper-base/ebe41f70d5b6dfa9166e2c581c45c9c0cfc57b66/config.json "HTTP/1.1 200 OK"
+2026-01-14 08:50:22 [INFO] httpx: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/Systran/faster-whisper-base/ebe41f70d5b6dfa9166e2c581c45c9c0cfc57b66/vocabulary.txt "HTTP/1.1 200 OK"
+2026-01-14 08:50:22 [INFO] httpx: HTTP Request: GET https://huggingface.co/api/models/Systran/faster-whisper-base/xet-read-token/ebe41f70d5b6dfa9166e2c581c45c9c0cfc57b66 "HTTP/1.1 200 OK"
+2026-01-14 08:50:22 [INFO] httpx: HTTP Request: GET https://huggingface.co/api/resolve-cache/models/Systran/faster-whisper-base/ebe41f70d5b6dfa9166e2c581c45c9c0cfc57b66/config.json "HTTP/1.1 200 OK"
+2026-01-14 08:50:22 [INFO] httpx: HTTP Request: GET https://huggingface.co/api/resolve-cache/models/Systran/faster-whisper-base/ebe41f70d5b6dfa9166e2c581c45c9c0cfc57b66/vocabulary.txt "HTTP/1.1 200 OK"
+2026-01-14 08:50:22 [INFO] httpx: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/Systran/faster-whisper-base/ebe41f70d5b6dfa9166e2c581c45c9c0cfc57b66/tokenizer.json "HTTP/1.1 200 OK"
+2026-01-14 08:50:22 [INFO] httpx: HTTP Request: GET https://huggingface.co/api/resolve-cache/models/Systran/faster-whisper-base/ebe41f70d5b6dfa9166e2c581c45c9c0cfc57b66/tokenizer.json "HTTP/1.1 200 OK"
+2026-01-14 08:50:23 [INFO] apscheduler.scheduler: Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-01-14 08:50:23 [INFO] apscheduler.scheduler: Added job "TranscriptionManager._cleanup_old_files" to job store "default"
+2026-01-14 08:50:23 [INFO] apscheduler.scheduler: Scheduler started
+2026-01-14 08:50:23 [INFO] __main__: Google Gemini API configured
+2026-01-14 08:50:23 [INFO] __main__: ============================================================
+2026-01-14 08:50:23 [INFO] __main__: 🚀 Flask Transcription App - Starting...
+2026-01-14 08:50:23 [INFO] __main__: ============================================================
+2026-01-14 08:50:23 [INFO] __main__: Validating environment...
+2026-01-14 08:50:23 [INFO] __main__: Environment: production
+2026-01-14 08:50:23 [INFO] __main__: Debug mode: False
+2026-01-14 08:50:23 [INFO] __main__: Upload folder: uploads
+2026-01-14 08:50:23 [INFO] __main__: Download folder: downloads
+2026-01-14 08:50:23 [INFO] __main__: AI features: Enabled
+2026-01-14 08:50:23 [INFO] __main__: Speaker diarization: Enabled
+2026-01-14 08:50:23 [INFO] __main__: ✅ All checks passed! Starting server...
+2026-01-14 08:50:23 [INFO] __main__: Server running on http://0.0.0.0:5000
+2026-01-14 08:50:23 [INFO] __main__: Debug mode: False
+2026-01-14 08:50:23 [WARNING] __main__: Running in PRODUCTION mode. Consider using a WSGI server (Gunicorn/Waitress) for production.
+2026-01-14 09:06:20 [ERROR] werkzeug: 147.236.230.237 - - [14/Jan/2026 09:06:20] code 400, message Bad request version ('**\x13\x01\x13\x02\x13\x03À+À/À,À0Ì©Ì¨À\x13À\x14\x00\x9c\x00\x9d\x00/\x005\x01\x00\x063')
+2026-01-14 09:06:20 [ERROR] werkzeug: 147.236.230.237 - - [14/Jan/2026 09:06:20] code 400, message Bad request version ('\x02h2\x08http/1.1ÿ\x01\x00\x01\x00\x00\x17\x00\x00\x00')
+2026-01-14 09:50:23 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._cleanup_old_files (trigger: interval[1:00:00], next run at: 2026-01-14 10:50:23 UTC)" (scheduled at 2026-01-14 09:50:23.439944+00:00)
+2026-01-14 09:50:23 [INFO] apscheduler.executors.default: Job "TranscriptionManager._cleanup_old_files (trigger: interval[1:00:00], next run at: 2026-01-14 10:50:23 UTC)" executed successfully
+2026-01-14 10:01:07 [INFO] __main__: Initializing TranscriptionManager...
+2026-01-14 10:01:08 [INFO] httpx: HTTP Request: GET https://huggingface.co/api/models/Systran/faster-whisper-base/revision/main "HTTP/1.1 200 OK"
+2026-01-14 10:01:08 [INFO] apscheduler.scheduler: Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-01-14 10:01:08 [INFO] apscheduler.scheduler: Added job "TranscriptionManager._cleanup_old_files" to job store "default"
+2026-01-14 10:01:08 [INFO] apscheduler.scheduler: Scheduler started
+2026-01-14 10:01:08 [INFO] __main__: Google Gemini API configured
+2026-01-14 10:01:08 [INFO] __main__: ============================================================
+2026-01-14 10:01:08 [INFO] __main__: 🚀 Flask Transcription App - Starting...
+2026-01-14 10:01:08 [INFO] __main__: ============================================================
+2026-01-14 10:01:08 [INFO] __main__: Validating environment...
+2026-01-14 10:01:08 [INFO] __main__: Environment: production
+2026-01-14 10:01:08 [INFO] __main__: Debug mode: False
+2026-01-14 10:01:08 [INFO] __main__: Upload folder: uploads
+2026-01-14 10:01:08 [INFO] __main__: Download folder: downloads
+2026-01-14 10:01:08 [INFO] __main__: AI features: Enabled
+2026-01-14 10:01:08 [INFO] __main__: Speaker diarization: Enabled
+2026-01-14 10:01:08 [INFO] __main__: ✅ All checks passed! Starting server...
+2026-01-14 10:01:08 [INFO] __main__: Server running on http://0.0.0.0:5000
+2026-01-14 10:01:08 [INFO] __main__: Debug mode: False
+2026-01-14 10:01:08 [WARNING] __main__: Running in PRODUCTION mode. Consider using a WSGI server (Gunicorn/Waitress) for production.
+2026-01-14 10:31:30 [INFO] faster_whisper: Processing audio with duration 02:11:46.091
+2026-01-14 11:30:22 [INFO] __main__: Initializing TranscriptionManager...
+2026-01-14 11:30:22 [INFO] httpx: HTTP Request: GET https://huggingface.co/api/models/Systran/faster-whisper-base/revision/main "HTTP/1.1 200 OK"
+2026-01-14 11:30:23 [INFO] apscheduler.scheduler: Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-01-14 11:30:23 [INFO] apscheduler.scheduler: Added job "TranscriptionManager._cleanup_old_files" to job store "default"
+2026-01-14 11:30:23 [INFO] apscheduler.scheduler: Scheduler started
+2026-01-14 11:30:23 [INFO] __main__: Google Gemini API configured
+2026-01-14 11:30:23 [INFO] __main__: ============================================================
+2026-01-14 11:30:23 [INFO] __main__: 🚀 Flask Transcription App - Starting...
+2026-01-14 11:30:23 [INFO] __main__: ============================================================
+2026-01-14 11:30:23 [INFO] __main__: Validating environment...
+2026-01-14 11:30:23 [INFO] __main__: Environment: production
+2026-01-14 11:30:23 [INFO] __main__: Debug mode: False
+2026-01-14 11:30:23 [INFO] __main__: Upload folder: uploads
+2026-01-14 11:30:23 [INFO] __main__: Download folder: downloads
+2026-01-14 11:30:23 [INFO] __main__: AI features: Enabled
+2026-01-14 11:30:23 [INFO] __main__: Speaker diarization: Enabled
+2026-01-14 11:30:23 [INFO] __main__: ✅ All checks passed! Starting server...
+2026-01-14 11:30:23 [INFO] __main__: Server running on http://0.0.0.0:5000
+2026-01-14 11:30:23 [INFO] __main__: Debug mode: False
+2026-01-14 11:30:23 [WARNING] __main__: Running in PRODUCTION mode. Consider using a WSGI server (Gunicorn/Waitress) for production.
+2026-01-14 11:37:42 [INFO] __main__: Initializing TranscriptionManager...
+2026-01-14 11:37:42 [INFO] httpx: HTTP Request: GET https://huggingface.co/api/models/Systran/faster-whisper-base/revision/main "HTTP/1.1 200 OK"
+2026-01-14 11:37:43 [INFO] apscheduler.scheduler: Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-01-14 11:37:43 [INFO] apscheduler.scheduler: Added job "TranscriptionManager._cleanup_old_files" to job store "default"
+2026-01-14 11:37:43 [INFO] apscheduler.scheduler: Scheduler started
+2026-01-14 11:37:43 [INFO] __main__: Google Gemini API configured
+2026-01-14 11:37:43 [INFO] __main__: ============================================================
+2026-01-14 11:37:43 [INFO] __main__: 🚀 Flask Transcription App - Starting...
+2026-01-14 11:37:43 [INFO] __main__: ============================================================
+2026-01-14 11:37:43 [INFO] __main__: Validating environment...
+2026-01-14 11:37:43 [INFO] __main__: Environment: production
+2026-01-14 11:37:43 [INFO] __main__: Debug mode: False
+2026-01-14 11:37:43 [INFO] __main__: Upload folder: uploads
+2026-01-14 11:37:43 [INFO] __main__: Download folder: downloads
+2026-01-14 11:37:43 [INFO] __main__: AI features: Enabled
+2026-01-14 11:37:43 [INFO] __main__: Speaker diarization: Enabled
+2026-01-14 11:37:43 [INFO] __main__: ✅ All checks passed! Starting server...
+2026-01-14 11:37:43 [INFO] __main__: Server running on http://0.0.0.0:5000
+2026-01-14 11:37:43 [INFO] __main__: Debug mode: False
+2026-01-14 11:37:43 [WARNING] __main__: Running in PRODUCTION mode. Consider using a WSGI server (Gunicorn/Waitress) for production.

@@ -60,7 +60,7 @@ os.makedirs(config.DOWNLOAD_FOLDER, exist_ok=True)
 
 # Initialize TranscriptionManager with HF token for speaker diarization
 logger.info("Initializing TranscriptionManager...")
-manager = TranscriptionManager(hf_token=config.HF_TOKEN)
+manager = TranscriptionManager()
 
 ALLOWED_EXTENSIONS = config.ALLOWED_EXTENSIONS
 
