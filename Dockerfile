@@ -1,6 +1,6 @@
 FROM python:3.10-slim
 
-# 1. התקנת תלויות מערכת (הוספנו ספריות פיתוח כדי ש-av יצליח להתקין)
+# 1. התקנת תלויות מערכת
 RUN apt-get update && apt-get install -y \
     ffmpeg \
     git \
@@ -19,18 +19,23 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
+# 2. טריק לחיסכון במקום: התקנת PyTorch בגרסת CPU בלבד (חוסך 3GB!)
+RUN pip install torch torchaudio --index-url https://download.pytorch.org/whl/cpu
+
 COPY requirements.txt .
 
-# 2. שדרוג pip והתקנת הספריות (כולל זיהוי דוברים)
-RUN pip install --upgrade pip setuptools wheel
-RUN pip install --no-cache-dir -r requirements.txt
+# 3. הסרת torch מהקובץ (כדי ש-pip לא ינסה לשדרג לגרסה הכבדה) והתקנת השאר
+RUN sed -i '/torch/d' requirements.txt && \
+    pip install --no-cache-dir -r requirements.txt
 
-# 3. הורדת המודל המהיר מראש
+# 4. הורדת מודל Whisper
 RUN python3 -c "from faster_whisper import download_model; download_model('tiny')"
 
 COPY . .
 
+# 5. תיקון לקוד (Diarization Token Fix)
+RUN sed -i 's/use_auth_token=self.hf_token/token=self.hf_token/g' transcriber_engine.py || true
+
 EXPOSE 5000
 
-# 4. הפעלה עם זמן קצוב ארוך (20 דקות) למניעת ניתוקים בהקלטות ארוכות
 CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "1", "--threads", "4", "--timeout", "1200", "app:app"]
