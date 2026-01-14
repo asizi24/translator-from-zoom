@@ -38,11 +38,11 @@ class TranscriptionManager:
         # Load persisted tasks from disk
         self._load_tasks()
         
-        # Load Model Once (Global) - Optimized for CPU
-        # 'tiny', 'base', 'small', 'medium', 'large-v3'
+        # Load Model Once (Global) - Optimized for CPU + Speed
+        # Options: 'tiny' (fast), 'base' (balanced), 'small', 'medium', 'large-v3' (accurate)
         if not test_mode:
-            logger.info("Loading Faster-Whisper model (base)...")
-            self.model = WhisperModel("base", device="cpu", compute_type="int8")
+            logger.info("Loading Faster-Whisper model (tiny - speed optimized)...")
+            self.model = WhisperModel("tiny", device="cpu", compute_type="int8")
             logger.info("Whisper model loaded successfully")
         else:
             self.model = None
@@ -144,10 +144,17 @@ class TranscriptionManager:
             if not os.path.exists(audio_file):
                 raise Exception("Audio file not found")
 
-            # === PHASE 2: FAST TRANSCRIPTION ===
+            # === PHASE 2: FAST TRANSCRIPTION (Speed Optimized) ===
             self._update(task_id, 'transcribing', 40, 'AI Transcribing (Faster-Whisper)...')
             
-            segments, info = self.model.transcribe(audio_file, beam_size=5, language="he")
+            # Speed optimizations: beam_size=1, VAD filter skips silence
+            segments, info = self.model.transcribe(
+                audio_file, 
+                beam_size=1,  # Faster (was 5)
+                language="he",
+                vad_filter=True,  # Skip silent parts
+                vad_parameters=dict(min_silence_duration_ms=500)
+            )
             
             # Live progress update based on segments is hard without duration, 
             # so we just iterate.
