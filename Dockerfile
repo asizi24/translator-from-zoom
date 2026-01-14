@@ -1,11 +1,18 @@
 FROM python:3.10-slim
 
-# התקנת תלויות מערכת (הוספנו את libsndfile1 לזיהוי דוברים)
+# התקנת תלויות מערכת (הוספנו את libsndfile1 לזיהוי דוברים + pkg-config ל-PyAV)
 RUN apt-get update && apt-get install -y \
     ffmpeg \
     git \
     curl \
     libsndfile1 \
+    pkg-config \
+    libavformat-dev \
+    libavcodec-dev \
+    libavdevice-dev \
+    libavutil-dev \
+    libswscale-dev \
+    libswresample-dev \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
