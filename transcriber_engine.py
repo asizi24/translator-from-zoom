@@ -50,7 +50,7 @@ class TranscriptionManager:
                 try:
                     self.diarization_pipeline = Pipeline.from_pretrained(
                         "pyannote/speaker-diarization-3.1",
-                        use_auth_token=self.hf_token
+                        token=self.hf_token
                     )
                     logger.info("✅ Diarization pipeline loaded successfully")
                 except Exception as e:
