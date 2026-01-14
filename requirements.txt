@@ -9,7 +9,7 @@ python-dotenv==1.0.0
 apscheduler==3.10.4
 python-docx==1.1.0
 fpdf2==2.7.7
-# ספריות לזיהוי דוברים (אופציונלי - הסר את ההערה אם הספריות מותקנות)
-# pyannote.audio==3.1.1
-# torch==2.0.1
-# torchaudio==2.0.2
+# ספריות לזיהוי דוברים
+pyannote.audio==3.1.1
+torch==2.0.1
+torchaudio==2.0.2
