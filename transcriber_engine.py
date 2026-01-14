@@ -11,9 +11,18 @@ import yt_dlp
 from faster_whisper import WhisperModel
 import google.generativeai as genai
 from apscheduler.schedulers.background import BackgroundScheduler
-# ייבוא זיהוי דוברים (ייטען רק אם צריך)
-from pyannote.audio import Pipeline
-import torch
+# ייבוא זיהוי דוברים (אופציונלי - נטען רק אם הספרייה קיימת)
+try:
+    from pyannote.audio import Pipeline
+    PYANNOTE_AVAILABLE = True
+except ImportError:
+    Pipeline = None
+    PYANNOTE_AVAILABLE = False
+
+try:
+    import torch
+except ImportError:
+    torch = None
 
 logger = logging.getLogger(__name__)
 
@@ -34,17 +43,20 @@ class TranscriptionManager:
             logger.info("🚀 Loading Faster-Whisper (Tiny - optimized for speed)...")
             self.model = WhisperModel("tiny", device="cpu", compute_type="int8")
             
-            # טעינת מודל זיהוי דוברים (אם יש טוקן)
+            # טעינת מודל זיהוי דוברים (אם יש טוקן וספריית pyannote זמינה)
             self.diarization_pipeline = None
-            if self.hf_token:
+            if self.hf_token and PYANNOTE_AVAILABLE:
                 logger.info("👥 Loading Speaker Diarization pipeline...")
                 try:
                     self.diarization_pipeline = Pipeline.from_pretrained(
                         "pyannote/speaker-diarization-3.1",
                         use_auth_token=self.hf_token
                     )
+                    logger.info("✅ Diarization pipeline loaded successfully")
                 except Exception as e:
-                    logger.error(f"Failed to load Diarization: {e}")
+                    logger.warning(f"⚠️ Diarization disabled: {e}")
+            elif not PYANNOTE_AVAILABLE:
+                logger.info("ℹ️ Diarization disabled (pyannote.audio not installed)")
         else:
             self.model = None
 
