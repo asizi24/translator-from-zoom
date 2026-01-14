@@ -49,6 +49,11 @@ cd ~/transcription-app
 # Create required subdirectories
 mkdir -p downloads uploads logs
 
+# Fix permissions explicitly for the app
+chmod -R 755 downloads uploads logs
+chown -R ubuntu:ubuntu downloads uploads logs
+echo "✅ Folders created with correct permissions"
+
 # Create nginx.conf
 echo "🔧 Creating nginx configuration..."
 cat > nginx.conf << 'EOF'

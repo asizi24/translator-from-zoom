@@ -25,5 +25,10 @@ COPY . .
 # Expose the port (Gunicorn default)
 EXPOSE 5000
 
-# Run Gunicorn with 2 workers and a long timeout for long transcriptions
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "2", "--timeout", "300", "app:app"]
+# Health check for container orchestration
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD curl -f http://localhost:5000/health || exit 1
+
+# Run Gunicorn with 1 worker + 4 threads (shared state) and long timeout
+# Using 1 worker because TranscriptionManager uses in-memory task state
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "1", "--threads", "4", "--timeout", "600", "app:app"]

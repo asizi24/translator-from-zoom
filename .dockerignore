@@ -1,0 +1,38 @@
+# Environment and secrets
+.env
+*.pem
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Git
+.git/
+.github/
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+
+# Data directories (mounted as volumes)
+downloads/
+uploads/
+
+# Logs
+*.log
+app.log
+
+# Test files
+test_*.py
+verify_*.py
+demo_*.py
+
+# Documentation
+README.md
+*.txt
+
+# Gemini artifacts
+.gemini/

@@ -1,9 +1,23 @@
-flask
-flask-cors
-werkzeug
-yt-dlp
-faster-whisper
-google-generativeai
-python-dotenv
-gunicorn
-apscheduler
+# Core Framework
+flask==3.0.0
+flask-cors==4.0.0
+werkzeug==3.0.1
+
+# Video Processing
+yt-dlp>=2024.1.0
+
+# AI/ML
+faster-whisper==1.0.1
+google-generativeai>=0.3.2
+
+# Server
+gunicorn==21.2.0
+python-dotenv==1.0.0
+apscheduler==3.10.4
+
+# Export Features
+python-docx==1.1.0
+fpdf2==2.7.7
+
+# Monitoring (optional but recommended)
+psutil==5.9.8

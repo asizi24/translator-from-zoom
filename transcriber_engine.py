@@ -5,11 +5,16 @@ import os
 import time
 import json
 import glob
+import logging
+import atexit
+import signal
 from datetime import datetime, timedelta
 import yt_dlp
 from faster_whisper import WhisperModel
 import google.generativeai as genai
 from apscheduler.schedulers.background import BackgroundScheduler
+
+logger = logging.getLogger(__name__)
 
 class TranscriptionManager:
     """
@@ -18,20 +23,29 @@ class TranscriptionManager:
     - Audio-only download (saves bandwidth)
     - Faster-Whisper (4x speed on CPU)
     - Auto-Cleanup (Janitor)
+    - Task persistence (survives restarts)
     """
     
-    def __init__(self, test_mode=False):
+    TASKS_FILE = "tasks_state.json"  # Persistence file for crash recovery
+    
+    def __init__(self, test_mode=False, hf_token=None):
         self.task_queue = queue.Queue()
         self.tasks = {}
         self.lock = threading.Lock()
         self.test_mode = test_mode
+        self.hf_token = hf_token  # For future speaker diarization
+        
+        # Load persisted tasks from disk
+        self._load_tasks()
         
         # Load Model Once (Global) - Optimized for CPU
         # 'tiny', 'base', 'small', 'medium', 'large-v3'
         if not test_mode:
-            print("⏳ Loading Faster-Whisper model (base)...")
+            logger.info("Loading Faster-Whisper model (base)...")
             self.model = WhisperModel("base", device="cpu", compute_type="int8")
-            print("✅ Model loaded!")
+            logger.info("Whisper model loaded successfully")
+        else:
+            self.model = None
         
         # Start Worker
         self.worker = threading.Thread(target=self._worker_loop, daemon=True)
@@ -41,6 +55,10 @@ class TranscriptionManager:
         self.scheduler = BackgroundScheduler()
         self.scheduler.add_job(self._cleanup_old_files, 'interval', hours=1)
         self.scheduler.start()
+        
+        # Graceful shutdown
+        atexit.register(self._shutdown)
+        signal.signal(signal.SIGTERM, lambda s, f: self._shutdown())
     
     def submit_task(self, url=None, file_path=None, test_mode=None):
         if not url and not file_path:
@@ -72,12 +90,16 @@ class TranscriptionManager:
             return dict(self.tasks)
 
     def _worker_loop(self):
+        """Main worker loop - processes tasks from the queue."""
         while True:
+            task_id = None
             try:
                 task_id, url, file_path, test_mode = self.task_queue.get()
                 self._process_task(task_id, url, file_path, test_mode)
             except Exception as e:
-                print(f"Worker Error: {e}")
+                logger.exception(f"Worker error (task_id={task_id}): {e}")
+                if task_id:
+                    self._update(task_id, 'error', 0, f"Internal error: {str(e)}")
             finally:
                 self.task_queue.task_done()
 
@@ -153,19 +175,54 @@ class TranscriptionManager:
                          filename=text_file, text=transcript_text, summary=ai_summary)
 
         except Exception as e:
-            print(f"Task Failed: {e}")
+            logger.exception(f"Task failed (task_id={task_id}): {e}")
             self._update(task_id, 'error', 0, f"Error: {str(e)}")
 
-    def _update(self, task_id, status, progress, message, filename=None, text=None, summary=None):
+    def _update(self, task_id, status, progress, message, filename=None, text=None, summary=None, segments=None):
+        """Update task status. Only updates fields that are not None."""
         with self.lock:
-            self.tasks[task_id].update({
+            if task_id not in self.tasks:
+                logger.warning(f"Attempted to update non-existent task: {task_id}")
+                return
+            
+            update_data = {
                 'status': status,
                 'progress': progress,
                 'message': message,
-                'filename': filename,
-                'transcript_text': text,
-                'ai_summary': summary
-            })
+            }
+            # Only update optional fields if not None
+            if filename is not None:
+                update_data['filename'] = filename
+            if text is not None:
+                update_data['transcript_text'] = text
+            if summary is not None:
+                update_data['ai_summary'] = summary
+            if segments is not None:
+                update_data['transcript_segments'] = segments
+            
+            self.tasks[task_id].update(update_data)
+        # Persist to disk after every update
+        self._save_tasks()
+    
+    def _save_tasks(self):
+        """Persist tasks to JSON file for crash recovery"""
+        with self.lock:
+            try:
+                with open(self.TASKS_FILE, 'w', encoding='utf-8') as f:
+                    json.dump(self.tasks, f, ensure_ascii=False, indent=2)
+            except Exception as e:
+                logger.warning(f"Could not save tasks to disk: {e}")
+    
+    def _load_tasks(self):
+        """Load tasks from JSON file on startup"""
+        if os.path.exists(self.TASKS_FILE):
+            try:
+                with open(self.TASKS_FILE, 'r', encoding='utf-8') as f:
+                    self.tasks = json.load(f)
+                logger.info(f"Loaded {len(self.tasks)} tasks from disk")
+            except Exception as e:
+                logger.warning(f"Could not load tasks from disk: {e}")
+                self.tasks = {}
 
     def _analyze_with_gemini(self, text, text_file):
         """Generates Title, Tags, Summary"""
@@ -195,26 +252,40 @@ class TranscriptionManager:
             
             return data
         except Exception as e:
-            print(f"Gemini Error: {e}")
+            logger.error(f"Gemini analysis error: {e}")
             return None
 
     def _cleanup_old_files(self):
         """Janitor: Deletes files older than 24 hours"""
-        print("🧹 Janitor: Cleaning up old files...")
+        logger.info("Janitor: Cleaning up old files...")
         folders = ["downloads", "uploads"]
         cutoff = time.time() - (24 * 3600)
+        deleted_count = 0
         
         for folder in folders:
-            if not os.path.exists(folder): continue
+            if not os.path.exists(folder): 
+                continue
             for f in os.listdir(folder):
                 path = os.path.join(folder, f)
                 if os.path.isfile(path):
                     if os.path.getmtime(path) < cutoff:
                         try:
                             os.remove(path)
-                            print(f"Deleted old file: {f}")
+                            deleted_count += 1
+                            logger.debug(f"Deleted old file: {f}")
                         except Exception as e:
-                            print(f"Error deleting {f}: {e}")
+                            logger.warning(f"Error deleting {f}: {e}")
+        
+        if deleted_count > 0:
+            logger.info(f"Janitor: Deleted {deleted_count} old files")
+    
+    def _shutdown(self):
+        """Graceful shutdown handler."""
+        logger.info("Shutting down TranscriptionManager...")
+        try:
+            self.scheduler.shutdown(wait=False)
+        except Exception as e:
+            logger.warning(f"Error shutting down scheduler: {e}")
 
     def _simulate_task(self, task_id):
         """For testing UI without running AI"""

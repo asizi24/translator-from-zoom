@@ -54,9 +54,22 @@ def setup_logging():
 setup_logging()
 logger = logging.getLogger(__name__)
 
-# Ensure folders exist
-os.makedirs(config.UPLOAD_FOLDER, exist_ok=True)
-os.makedirs(config.DOWNLOAD_FOLDER, exist_ok=True)
+# Ensure folders exist with proper permissions
+def ensure_folders():
+    """Create folders with explicit permissions for EC2 compatibility"""
+    for folder in [config.UPLOAD_FOLDER, config.DOWNLOAD_FOLDER]:
+        try:
+            os.makedirs(folder, exist_ok=True)
+            # On Linux, ensure writable by current user
+            if os.name != 'nt':  # Not Windows
+                os.chmod(folder, 0o755)
+            logger.info(f"Folder ready: {folder}")
+        except PermissionError as e:
+            logger.error(f"Permission denied creating {folder}: {e}")
+            logger.error("Fix with: sudo chown -R $USER:$USER .")
+            raise
+
+ensure_folders()
 
 # Initialize TranscriptionManager with HF token for speaker diarization
 logger.info("Initializing TranscriptionManager...")
@@ -204,7 +217,8 @@ def preview(task_id):
             try:
                 with open(filename, 'r', encoding='utf-8') as f:
                     transcript_text = f.read()
-            except:
+            except Exception as e:
+                logger.error(f"Failed to read transcript file {filename}: {e}")
                 return jsonify({"error": "Could not read transcript"}), 500
         else:
             return jsonify({"error": "Transcript not available"}), 404
@@ -227,12 +241,25 @@ def download(task_id):
         return jsonify({"error": "Task not completed yet"}), 400
     
     filename = task_status.get('filename')
-    if not filename or not os.path.exists(filename):
+    if not filename:
+        return jsonify({"error": "File not found"}), 404
+    
+    # Security: Ensure file is in allowed directories (prevent path traversal)
+    abs_path = os.path.abspath(filename)
+    allowed_dirs = [
+        os.path.abspath(config.DOWNLOAD_FOLDER),
+        os.path.abspath(config.UPLOAD_FOLDER)
+    ]
+    if not any(abs_path.startswith(d + os.sep) or abs_path == d for d in allowed_dirs):
+        logger.warning(f"Attempted path traversal: {filename} -> {abs_path}")
+        return jsonify({"error": "Access denied"}), 403
+    
+    if not os.path.exists(abs_path):
         return jsonify({"error": "File not found"}), 404
     
     # Extract directory and basename
-    directory = os.path.dirname(filename)
-    basename = os.path.basename(filename)
+    directory = os.path.dirname(abs_path)
+    basename = os.path.basename(abs_path)
     
     return send_from_directory(directory, basename, as_attachment=True)
 
