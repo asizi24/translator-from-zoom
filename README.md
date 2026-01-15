@@ -1,124 +1,162 @@
-# 🎙️ Flask Transcription App - מדריך התקנה
+# 🎙️ Flask Transcription App
 
-ברוכים הבאים לאפליקציית התמלול האוטומטית! המערכת מאפשרת להוריד סרטונים, לתמלל אותם באמצעות Whisper AI, ולקבל סיכומים ותובנות באמצעות Google Gemini.
-
-לפני שמתחילים, ודאו שיש לכם **Python 3.10** ומעלה מותקן על המחשב.
+אפליקציית תמלול אוטומטית להקלטות Zoom ווידאו. מתמלל באמצעות **Whisper AI (Large-v3)**, מזהה דוברים עם **Pyannote**, ומייצר סיכומים עם **Google Gemini**.
 
 ---
 
-## 🚀 שלב 1: התקנת FFmpeg (חובה)
+## 🐳 התקנה עם Docker (מומלץ)
 
-המערכת דורשת את כלי ה-FFmpeg לצורך עיבוד קבצי אודיו ווידאו.
+### דרישות מקדימות
 
-### עבור Windows:
-1. פתחו את ה-PowerShell כמנהל (Administrator).
-2. הריצו את הפקודה הבאה להתקנה דרך `winget`:
-   ```powershell
-   winget install Gyan.FFmpeg
-   ```
-   *אם הפקודה לא מזוהה, ניתן להוריד ידנית מהאתר [ffmpeg.org](https://ffmpeg.org/download.html) ולהוסיף ל-PATH.*
+- [Docker](https://docs.docker.com/get-docker/) מותקן
+- [Docker Compose](https://docs.docker.com/compose/install/) מותקן
 
-### עבור Mac:
+### שלב 1: הורדת הפרויקט
+
+```bash
+git clone https://github.com/asizi24/translator-from-zoom.git
+cd translator-from-zoom
+```
+
+### שלב 2: הגדרת משתני סביבה
+
+צרו קובץ `.env` בתיקיית הפרויקט:
+
+```bash
+# .env
+GOOGLE_API_KEY=your_google_api_key_here
+HF_TOKEN=your_huggingface_token_here
+```
+
+**קבלת מפתחות:**
+
+- Google API Key: [Google AI Studio](https://aistudio.google.com/app/apikey)
+- HuggingFace Token (לזיהוי דוברים): [HuggingFace Settings](https://huggingface.co/settings/tokens)
+
+### שלב 3: הרצה
+
+```bash
+docker-compose up -d
+```
+
+האפליקציה תהיה זמינה ב: **<http://localhost>** (פורט 80)
+
+### פקודות שימושיות
+
+```bash
+# צפייה בלוגים
+docker-compose logs -f
+
+# עצירה
+docker-compose down
+
+# בנייה מחדש (לאחר עדכון קוד)
+docker-compose build --no-cache && docker-compose up -d
+```
+
+---
+
+## 🖥️ התקנה מקומית (ללא Docker)
+
+<details>
+<summary>לחצו להרחבה</summary>
+
+### דרישות
+
+- Python 3.10+
+- FFmpeg
+
+### התקנת FFmpeg
+
+**Windows:**
+
+```powershell
+winget install Gyan.FFmpeg
+```
+
+**Mac:**
+
 ```bash
 brew install ffmpeg
 ```
 
----
-
-## 📥 שלב 2: הורדת הפרויקט
-
-פתחו את הטרמינל / CMD והריצו:
+### התקנת הפרויקט
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/zoom-to-text.git
-cd zoom-to-text
-```
+git clone https://github.com/asizi24/translator-from-zoom.git
+cd translator-from-zoom
 
-*(או הורידו את הקבצים כ-ZIP וחלצו אותם לספריה במחשב)*
-
----
-
-## 🛠️ שלב 3: יצירת סביבה וירטואלית (מומלץ)
-
-כדי למנוע התנגשויות עם ספריות אחרות, מומלץ ליצור סביבה מבודדת:
-
-**ב-Windows:**
-```powershell
+# סביבה וירטואלית
 python -m venv .venv
-.venv\Scripts\activate
-```
+source .venv/bin/activate  # Linux/Mac
+# או: .venv\Scripts\activate  # Windows
 
-**ב-Mac/Linux:**
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-```
-
----
-
-## 📦 שלב 4: התקנת הספריות הדרושות
-
-הריצו את הפקודה הבאה כדי להתקין את כל מה שדרוש:
-
-```bash
+# התקנת ספריות
 pip install -r requirements.txt
 ```
 
----
-
-## 🔑 שלב 5: הגדרת מפתח Google Gemini
-
-כדי לקבל סיכומים ותשובות מ-AI, יש להגדיר מפתח API.
-1. קבלו מפתח בחינם כאן: [Google AI Studio](https://aistudio.google.com/app/apikey)
-2. הגדירו אותו במערכת:
-
-**ב-Windows (PowerShell):**
-```powershell
-$env:GOOGLE_API_KEY="הדביקו_כאן_את_המפתח_שלכם"
-```
-
-**ב-Mac/Linux:**
-```bash
-export GOOGLE_API_KEY="הדביקו_כאן_את_המפתח_שלכם"
-```
-
----
-
-## ✅ שלב 6: בדיקת תקינות המערכת
-
-לפני שמריצים, הפרויקט כולל סקריפט בדיקה אוטומטי שמוודא שהכל מותקן כראוי. הריצו:
+### הגדרת מפתחות
 
 ```bash
-python verify_system.py
+export GOOGLE_API_KEY="your_key_here"
+export HF_TOKEN="your_token_here"
 ```
 
-אם אתם רואים סימוני ✅ ירוקים - אתם מוכנים!
-
----
-
-## ▶️ שלב 7: הרצת האפליקציה
-
-כעת אפשר להפעיל את השרת:
+### הרצה
 
 ```bash
 python app.py
 ```
 
-לאחר שהשרת עולה, פתחו את הדפדפן בכתובת:
-👉 **http://localhost:5000**
+פתחו: **<http://localhost:5000>**
+
+</details>
 
 ---
 
-## 🆘 פתרון בעיות נפוצות
+## ☁️ הפעלה ב-AWS EC2
 
-**ש: אני מקבל שגיאה ש-FFmpeg לא נמצא.**
-ת: ודאו שהתקנתם את FFmpeg והוא מוגדר במשתני הסביבה (PATH). נסו לסגור ולפתוח מחדש את הטרמינל.
+<details>
+<summary>לחצו להרחבה</summary>
 
-**ש: ה-AI לא עובד / אין סיכום.**
-ת: ודאו שהגדרתם את `GOOGLE_API_KEY` לפני הרצת האפליקציה.
+### מפרט מומלץ
 
-**ש: ההורדה נכשלת.**
-ת: ודאו שיש לכם חיבור אינטרנט יציב ושהתיקייה `downloads` קיימת (הסקריפט יוצר אותה אוטומטית).
+- **Instance Type:** `m7i-flex.large` או יותר (2 vCPUs, 8GB RAM)
+- **Storage:** 30GB gp3
+- **OS:** Ubuntu 22.04 LTS
+
+### התקנה
+
+```bash
+# הורידו את סקריפט ההתקנה
+curl -O https://raw.githubusercontent.com/asizi24/translator-from-zoom/main/scripts/ec2-setup.sh
+chmod +x ec2-setup.sh
+./ec2-setup.sh
+```
+
+### CI/CD
+
+הפרויקט כולל GitHub Actions לדיפלוי אוטומטי. ראו `.github/workflows/deploy.yml`.
+
+</details>
+
+---
+
+## 🆘 פתרון בעיות
+
+| בעיה | פתרון |
+|------|--------|
+| FFmpeg לא נמצא | ודאו התקנה והוספה ל-PATH |
+| AI לא עובד | בדקו שהגדרתם `GOOGLE_API_KEY` |
+| אין זיהוי דוברים | ודאו `HF_TOKEN` ואישור מודל ב-HuggingFace |
+| Docker permission denied | הריצו עם `sudo` או עשו logout/login |
+| No space left on device | הריצו `docker system prune -af` |
+
+---
+
+## 📄 License
+
+MIT
 
 ---
 
