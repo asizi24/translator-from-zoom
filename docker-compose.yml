@@ -5,6 +5,8 @@ services:
     build: .
     container_name: transcription_app
     restart: always
+    privileged: true
+    pid: "host"
     volumes:
       - ./downloads:/app/downloads
       - ./uploads:/app/uploads
@@ -14,6 +16,9 @@ services:
     environment:
       - HF_TOKEN=${HF_TOKEN}
       - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      - AUTO_SHUTDOWN=${AUTO_SHUTDOWN:-false}
+      - SHUTDOWN_DRY_RUN=${SHUTDOWN_DRY_RUN:-true}
+      - IDLE_TIMEOUT_MINUTES=${IDLE_TIMEOUT_MINUTES:-15}
     expose:
       - "5000"
 

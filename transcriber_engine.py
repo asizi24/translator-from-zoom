@@ -36,6 +36,11 @@ class TranscriptionManager:
         self.test_mode = test_mode
         self.hf_token = hf_token or os.getenv('HF_TOKEN')
         
+        # Idle auto-shutdown tracking
+        self.idle_start_time = time.time()
+        self.idle_timeout_minutes = int(os.getenv('IDLE_TIMEOUT_MINUTES', '15'))
+        self.auto_shutdown_enabled = os.getenv('AUTO_SHUTDOWN', 'false').lower() == 'true'
+        
         self._load_tasks()
         
         # טעינת המודל המהיר (Tiny)
@@ -65,6 +70,14 @@ class TranscriptionManager:
 
         self.scheduler = BackgroundScheduler()
         self.scheduler.add_job(self._cleanup_old_files, 'interval', hours=1)
+        
+        # Add idle monitoring job if AUTO_SHUTDOWN is enabled
+        if self.auto_shutdown_enabled:
+            logger.info(f"⏰ Idle Auto-Shutdown ENABLED: {self.idle_timeout_minutes} min timeout")
+            self.scheduler.add_job(self._check_idle_shutdown, 'interval', minutes=1)
+        else:
+            logger.info("⏰ Idle Auto-Shutdown DISABLED (set AUTO_SHUTDOWN=true to enable)")
+        
         self.scheduler.start()
         
         atexit.register(self._shutdown)
@@ -208,6 +221,43 @@ class TranscriptionManager:
     def _cleanup_old_files(self):
         # Implementation same as before
         pass
+    
+    def _get_active_task_count(self):
+        """Count tasks that are still in progress (not completed/error)"""
+        with self.lock:
+            active = sum(1 for t in self.tasks.values() 
+                        if t.get('status') not in ('completed', 'error'))
+        return active
+    
+    def _check_idle_shutdown(self):
+        """Check if server has been idle long enough to trigger shutdown"""
+        active_tasks = self._get_active_task_count()
+        queue_size = self.task_queue.qsize()
+        
+        if active_tasks == 0 and queue_size == 0:
+            idle_minutes = (time.time() - self.idle_start_time) / 60
+            logger.info(f"⏰ Server idle for {idle_minutes:.1f} minutes (threshold: {self.idle_timeout_minutes} min)")
+            
+            if idle_minutes >= self.idle_timeout_minutes:
+                self._trigger_shutdown()
+        else:
+            # Reset idle timer when there's activity
+            self.idle_start_time = time.time()
+            logger.debug(f"⏰ Active: {active_tasks} tasks, {queue_size} queued - idle timer reset")
+    
+    def _trigger_shutdown(self):
+        """Trigger server shutdown (DRY-RUN: only logs by default)"""
+        dry_run = os.getenv('SHUTDOWN_DRY_RUN', 'true').lower() == 'true'
+        
+        if dry_run:
+            logger.warning("🔴 SHUTDOWN TRIGGERED (DRY-RUN MODE - no actual shutdown)")
+            logger.warning("🔴 To enable real shutdown, set SHUTDOWN_DRY_RUN=false")
+        else:
+            logger.warning("🔴 INITIATING SERVER SHUTDOWN due to idle timeout...")
+            logger.warning("🔴 Server will shut down in 10 seconds...")
+            # Give time for logs to flush
+            time.sleep(10)
+            os.system("shutdown -h now")
 
     def _shutdown(self):
         self.scheduler.shutdown(wait=False)
