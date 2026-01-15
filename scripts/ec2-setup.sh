@@ -41,10 +41,11 @@ sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plug
 echo "👤 Adding ubuntu user to docker group..."
 sudo usermod -aG docker ubuntu
 
-# Create application directory
+# Create application directory (matching GitHub repo name)
 echo "📁 Creating application directory..."
-mkdir -p ~/transcription-app
-cd ~/transcription-app
+APP_DIR=~/translator-from-zoom
+mkdir -p $APP_DIR
+cd $APP_DIR
 
 # Create required subdirectories
 mkdir -p downloads uploads logs
