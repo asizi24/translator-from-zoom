@@ -19,14 +19,18 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
-# 2. טריק לחיסכון במקום: התקנת PyTorch בגרסת CPU בלבד (חוסך 3GB!)
-RUN pip install torch torchaudio --index-url https://download.pytorch.org/whl/cpu
+# 2. PyTorch CPU-only (saves 3GB+ vs CUDA version)
+RUN pip install torch==2.8.0 torchaudio==2.8.0 --index-url https://download.pytorch.org/whl/cpu
 
 COPY requirements.txt .
 
-# 3. הסרת torch מהקובץ (כדי ש-pip לא ינסה לשדרג לגרסה הכבדה) והתקנת השאר
-RUN sed -i '/torch/d' requirements.txt && \
-    pip install --no-cache-dir -r requirements.txt
+# 3. Install deps - CRITICAL: Install pyannote.audio without its torch dependency
+#    Otherwise it will override CPU torch with 3GB CUDA version
+RUN sed -i '/^torch/d' requirements.txt && \
+    sed -i '/pyannote.audio/d' requirements.txt && \
+    pip install --no-cache-dir -r requirements.txt && \
+    pip install --no-cache-dir --no-deps pyannote.audio && \
+    pip install --no-cache-dir pyannote.core pyannote.database pyannote.pipeline pyannote.metrics asteroid-filterbanks einops lightning pytorch-metric-learning rich soundfile torchmetrics
 
 # 4. Download Whisper model (large-v3 for maximum quality)
 RUN python3 -c "from faster_whisper import download_model; download_model('large-v3')"
