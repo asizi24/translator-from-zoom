@@ -20,7 +20,10 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app
 
 # 2. PyTorch CPU-only (saves 3GB+ vs CUDA version)
-RUN pip install torch==2.8.0 torchaudio==2.8.0 --index-url https://download.pytorch.org/whl/cpu
+#    Pre-install deps from PyPI to avoid metadata issues with PyTorch CPU index
+RUN pip install typing-extensions sympy filelock networkx && \
+    pip install torch==2.8.0 torchaudio==2.8.0 --index-url https://download.pytorch.org/whl/cpu --no-deps && \
+    pip install jinja2 fsspec
 
 COPY requirements.txt .
 
