@@ -43,6 +43,16 @@ class TranscriptionManager:
         
         self._load_tasks()
         
+        # Fix zombie tasks (tasks that were processing when server crashed)
+        with self.lock:
+            for t_id, task in self.tasks.items():
+                if task.get('status') in ['downloading', 'transcribing', 'analyzing', 'queued']:
+                    logger.warning(f"🧟 Found zombie task {t_id}, marking as error.")
+                    task['status'] = 'error'
+                    task['message'] = 'Server restarted during processing'
+                    task['progress'] = 0
+            self._save_tasks()
+        
         # Load Whisper model (large-v3 for maximum quality)
         if not test_mode:
             # 🧵 Hardware-Matched Threading: 2 vCPUs on m7i-flex.large
@@ -57,9 +67,12 @@ class TranscriptionManager:
                 try:
                     self.diarization_pipeline = Pipeline.from_pretrained(
                         "pyannote/speaker-diarization-3.1",
-                        token=self.hf_token
+                        use_auth_token=self.hf_token
                     )
-                    logger.info("✅ Diarization pipeline loaded successfully")
+                    # Force CPU mode to prevent CUDA errors
+                    if torch:
+                        self.diarization_pipeline.to(torch.device("cpu"))
+                    logger.info("✅ Diarization pipeline loaded successfully (CPU mode)")
                 except Exception as e:
                     logger.warning(f"⚠️ Diarization disabled: {e}")
             elif not PYANNOTE_AVAILABLE:
@@ -231,8 +244,26 @@ class TranscriptionManager:
         with open(f"{base}_segments.json", 'w', encoding='utf-8') as f: json.dump({'segments': segments}, f)
 
     def _cleanup_old_files(self):
-        # Implementation same as before
-        pass
+        """Delete old files to prevent disk full errors"""
+        logger.info("🧹 Running disk cleanup...")
+        retention_hours = int(os.getenv('CLEANUP_RETENTION_HOURS', '24'))
+        now = time.time()
+        
+        download_folder = "downloads"
+        count = 0
+        if os.path.exists(download_folder):
+            for filename in os.listdir(download_folder):
+                file_path = os.path.join(download_folder, filename)
+                # Delete files older than retention period
+                if os.path.isfile(file_path) and os.path.getmtime(file_path) < now - (retention_hours * 3600):
+                    try:
+                        os.remove(file_path)
+                        count += 1
+                        logger.debug(f"🧹 Deleted old file: {filename}")
+                    except Exception as e:
+                        logger.error(f"Error deleting {filename}: {e}")
+        
+        logger.info(f"🧹 Cleanup finished. Deleted {count} files.")
     
     def _get_active_task_count(self):
         """Count tasks that are still in progress (not completed/error)"""
