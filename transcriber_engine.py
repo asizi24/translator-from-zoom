@@ -45,8 +45,10 @@ class TranscriptionManager:
         
         # Load Whisper model (large-v3 for maximum quality)
         if not test_mode:
-            logger.info("🚀 Loading Faster-Whisper (Large-v3 - maximum quality)...")
-            self.model = WhisperModel("large-v3", device="cpu", compute_type="int8", cpu_threads=4)
+            # 🧵 Hardware-Matched Threading: 2 vCPUs on m7i-flex.large
+            cpu_threads = int(os.getenv('CPU_THREADS', '2'))
+            logger.info(f"🚀 Loading Faster-Whisper (Large-v3) with {cpu_threads} CPU threads...")
+            self.model = WhisperModel("large-v3", device="cpu", compute_type="int8", cpu_threads=cpu_threads)
             
             # טעינת מודל זיהוי דוברים (אם יש טוקן וספריית pyannote זמינה)
             self.diarization_pipeline = None
@@ -127,22 +129,37 @@ class TranscriptionManager:
                          segments=[{'start': 0, 'end': 1, 'text': 'Test segment', 'speaker': 'SPEAKER_00'}])
             return
         
-        # שלב 1: הורדה
-        self._update(task_id, 'downloading', 10, 'Downloading...')
+        # שלב 1: הורדה - ⚙️ Direct Audio Pipeline (WAV 16kHz Mono)
+        self._update(task_id, 'downloading', 10, 'Downloading (optimized WAV)...')
         audio_file = file_path
         if url:
+            # Download and convert directly to WAV (16kHz, Mono) in a single step
             ydl_opts = {
                 'format': 'bestaudio/best',
                 'outtmpl': os.path.join(download_folder, '%(id)s.%(ext)s'),
-                'postprocessors': [{'key': 'FFmpegExtractAudio', 'preferredcodec': 'mp3'}],
+                'postprocessors': [{
+                    'key': 'FFmpegExtractAudio',
+                    'preferredcodec': 'wav',
+                    'preferredquality': '0',
+                }],
+                'postprocessor_args': [
+                    '-ar', '16000',  # 16kHz sample rate
+                    '-ac', '1',       # Mono channel
+                ],
             }
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 info = ydl.extract_info(url, download=True)
-                audio_file = ydl.prepare_filename(info).rsplit('.', 1)[0] + ".mp3"
+                audio_file = ydl.prepare_filename(info).rsplit('.', 1)[0] + ".wav"
 
-        # שלב 2: תמלול מהיר
-        self._update(task_id, 'transcribing', 30, 'Transcribing (Tiny Model)...')
-        segments, _ = self.model.transcribe(audio_file, beam_size=1, language="he")
+        # שלב 2: תמלול מהיר - 🚀 VAD Filter enabled to skip silence
+        self._update(task_id, 'transcribing', 30, 'Transcribing (Large-v3 + VAD)...')
+        segments, _ = self.model.transcribe(
+            audio_file,
+            beam_size=1,
+            language="he",
+            vad_filter=True,
+            vad_parameters={"min_silence_duration_ms": 500}
+        )
         
         # המרת הסגמנטים לרשימה נוחה
         transcript_data = []
@@ -153,15 +170,12 @@ class TranscriptionManager:
             })
             full_text += seg.text + " "
 
-        # שלב 3: זיהוי דוברים (אם קיים)
+        # שלב 3: זיהוי דוברים (אם קיים) - ⚙️ No conversion needed, already WAV!
         if self.diarization_pipeline:
             self._update(task_id, 'transcribing', 60, 'Identifying Speakers...')
             try:
-                # המרת MP3 ל-WAV זמני עבור Pyannote
-                wav_file = audio_file.replace(".mp3", ".wav")
-                os.system(f"ffmpeg -i \"{audio_file}\" -ar 16000 -ac 1 -c:a pcm_s16le \"{wav_file}\" -y")
-                
-                diarization = self.diarization_pipeline(wav_file)
+                # Audio is already optimized WAV (16kHz, Mono) - no conversion needed!
+                diarization = self.diarization_pipeline(audio_file)
                 
                 # מיזוג דוברים עם טקסט
                 for segment in transcript_data:
@@ -173,8 +187,6 @@ class TranscriptionManager:
                             best_speaker = speaker
                             break
                     segment["speaker"] = best_speaker
-                
-                if os.path.exists(wav_file): os.remove(wav_file)
             except Exception as e:
                 logger.error(f"Diarization error: {e}")
 
@@ -185,7 +197,7 @@ class TranscriptionManager:
         # שמירה וסיום
         self._save_results(audio_file, transcript_data, full_text)
         self._update(task_id, 'completed', 100, 'Done!', 
-                     filename=audio_file.replace('.mp3', '.txt'),
+                     filename=audio_file.replace('.wav', '.txt'),
                      text=full_text, summary=ai_summary, segments=transcript_data)
         
         if url and os.path.exists(audio_file): os.remove(audio_file)
