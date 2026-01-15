@@ -43,10 +43,10 @@ class TranscriptionManager:
         
         self._load_tasks()
         
-        # טעינת המודל המהיר (Tiny)
+        # Load Whisper model (large-v3 for maximum quality)
         if not test_mode:
-            logger.info("🚀 Loading Faster-Whisper (Tiny - optimized for speed)...")
-            self.model = WhisperModel("tiny", device="cpu", compute_type="int8")
+            logger.info("🚀 Loading Faster-Whisper (Large-v3 - maximum quality)...")
+            self.model = WhisperModel("large-v3", device="cpu", compute_type="int8", cpu_threads=4)
             
             # טעינת מודל זיהוי דוברים (אם יש טוקן וספריית pyannote זמינה)
             self.diarization_pipeline = None

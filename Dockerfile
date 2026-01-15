@@ -28,8 +28,8 @@ COPY requirements.txt .
 RUN sed -i '/torch/d' requirements.txt && \
     pip install --no-cache-dir -r requirements.txt
 
-# 4. הורדת מודל Whisper
-RUN python3 -c "from faster_whisper import download_model; download_model('tiny')"
+# 4. Download Whisper model (large-v3 for maximum quality)
+RUN python3 -c "from faster_whisper import download_model; download_model('large-v3')"
 
 COPY . .
 
