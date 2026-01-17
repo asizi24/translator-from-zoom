@@ -29,9 +29,16 @@ fi
 
 # 5. עצירה והפעלה מחדש של האפליקציה
 echo "🔄 מפעיל מחדש את המערכת..."
-pkill -f app.py
+pkill -f gunicorn || true
+pkill -f app.py || true
 sleep 2
-nohup python3 app.py > output.log 2>&1 &
 
-echo "🎉 סיימתי! המערכת רצה ברקע."
+# Running with Gunicorn (production-grade WSGI server)
+# -w 1: single worker (sufficient for transcription workload)
+# --threads 4: 4 threads per worker for concurrent requests
+# --timeout 300: 5 minute timeout for long transcriptions
+echo "🚀 Starting Gunicorn server..."
+nohup gunicorn -w 1 --threads 4 -b 0.0.0.0:5000 --timeout 300 app:app > output.log 2>&1 &
+
+echo "🎉 סיימתי! המערכת רצה ברקע עם Gunicorn."
 echo "תוכל לראות את הלוגים עכשיו עם הפקודה: tail -f output.log"

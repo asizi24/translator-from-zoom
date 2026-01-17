@@ -114,6 +114,14 @@ cat > .env << 'EOF'
 HF_TOKEN=your_huggingface_token_here
 GOOGLE_API_KEY=your_google_api_key_here
 FLASK_ENV=production
+
+# Flask Security - Generate your own key with: python3 -c "import secrets; print(secrets.token_hex(32))"
+FLASK_SECRET_KEY=REPLACE_WITH_SECURE_KEY
+
+# Auto-Shutdown Configuration (AWS cost savings)
+AUTO_SHUTDOWN=true
+SHUTDOWN_DRY_RUN=false
+IDLE_TIMEOUT_MINUTES=15
 EOF
 
 echo ""
