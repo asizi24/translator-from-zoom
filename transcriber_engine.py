@@ -278,6 +278,8 @@ class TranscriptionManager:
             vad_filter=True,
             vad_parameters={"min_silence_duration_ms": 500},
             no_speech_threshold=0.7,  # Skip silence faster
+            compression_ratio_threshold=3.0,  # Skip problematic segments (music, noise)
+            log_prob_threshold=-1.5,  # Be more lenient with low-confidence segments
         )
         
         segments = []
