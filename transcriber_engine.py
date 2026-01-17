@@ -38,7 +38,7 @@ logger = logging.getLogger(__name__)
 # Configuration constants
 TASKS_FILE = "tasks_state.json"
 DOWNLOAD_FOLDER = "downloads"
-WHISPER_MODEL = "medium"  # Options: tiny, small, medium, large-v3
+WHISPER_MODEL = "small"  # Options: tiny, small, medium, large-v3 (small = best speed/quality)
 DEFAULT_LANGUAGE = "he"
 CLEANUP_RETENTION_HOURS = 24
 
@@ -276,7 +276,8 @@ class TranscriptionManager:
             beam_size=1,
             language=DEFAULT_LANGUAGE,
             vad_filter=True,
-            vad_parameters={"min_silence_duration_ms": 500}
+            vad_parameters={"min_silence_duration_ms": 500},
+            no_speech_threshold=0.7,  # Skip silence faster
         )
         
         segments = []
