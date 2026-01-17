@@ -25,22 +25,30 @@ def check_dependencies():
 
 def detect_hardware():
     """Detect GPU/CPU and set optimal configuration"""
+    import platform
+    cpu_count = os.cpu_count() or 4
+    
     try:
         import torch
         if torch.cuda.is_available():
             gpu_name = torch.cuda.get_device_name(0)
-            print(f"🎮 GPU Detected: {gpu_name}")
+            print(f"🎮 NVIDIA GPU Detected: {gpu_name}")
             print("⚡ Running in GPU mode (12x faster!)")
             os.environ['USE_GPU'] = 'true'
-        else:
-            print("💻 No NVIDIA GPU found, using CPU")
-            cpu_count = os.cpu_count() or 4
-            print(f"🔧 Using all {cpu_count} CPU cores")
-            os.environ['CPU_THREADS'] = str(cpu_count)
+            return
     except ImportError:
-        print("💻 Running in CPU-only mode")
-        cpu_count = os.cpu_count() or 4
-        os.environ['CPU_THREADS'] = str(cpu_count)
+        pass
+    
+    # CPU Mode - optimized for Intel
+    print(f"💻 Running on CPU: {cpu_count} cores/threads")
+    
+    # Intel Ultra series have P-cores + E-cores
+    # Use slightly fewer threads to avoid E-core bottleneck
+    optimal_threads = max(cpu_count - 2, 4)  # Leave 2 threads for system
+    os.environ['CPU_THREADS'] = str(optimal_threads)
+    
+    print(f"🔧 Using {optimal_threads} threads (optimized for Intel)")
+    print("💡 Tip: Close other apps for faster transcription")
 
 def main():
     print("=" * 50)
