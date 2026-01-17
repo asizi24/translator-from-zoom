@@ -1,17 +1,26 @@
-import threading
-import queue
-import uuid
-import os
-import time
+"""
+Transcription Engine - Core processing logic for audio transcription.
+
+Handles downloading, transcription via Whisper, speaker diarization,
+and AI-powered summaries. Runs as a background worker with task queue.
+"""
+# Standard library
+import atexit
 import json
 import logging
-import atexit
-import signal
+import os
+import queue
+import threading
+import time
+import uuid
+
+# Third-party
 import yt_dlp
+from apscheduler.schedulers.background import BackgroundScheduler
 from faster_whisper import WhisperModel
 import google.generativeai as genai
-from apscheduler.schedulers.background import BackgroundScheduler
-# ייבוא זיהוי דוברים (אופציונלי - נטען רק אם הספרייה קיימת)
+
+# Optional dependencies
 try:
     from pyannote.audio import Pipeline
     PYANNOTE_AVAILABLE = True
@@ -26,8 +35,21 @@ except ImportError:
 
 logger = logging.getLogger(__name__)
 
+# Configuration constants
+TASKS_FILE = "tasks_state.json"
+DOWNLOAD_FOLDER = "downloads"
+WHISPER_MODEL = "large-v3"
+DEFAULT_LANGUAGE = "he"
+CLEANUP_RETENTION_HOURS = 24
+
+
 class TranscriptionManager:
-    TASKS_FILE = "tasks_state.json"
+    """
+    Background worker that processes transcription tasks from a queue.
+    
+    Supports URL downloads (via yt-dlp), local file uploads, optional
+    speaker diarization, and AI-powered summaries via Google Gemini.
+    """
     
     def __init__(self, test_mode=False, hf_token=None):
         self.task_queue = queue.Queue()
@@ -36,286 +58,351 @@ class TranscriptionManager:
         self.test_mode = test_mode
         self.hf_token = hf_token or os.getenv('HF_TOKEN')
         
-        # Idle auto-shutdown tracking
+        # Auto-shutdown config (for cloud deployments)
         self.idle_start_time = time.time()
-        self.idle_timeout_minutes = int(os.getenv('IDLE_TIMEOUT_MINUTES', '15'))
-        self.auto_shutdown_enabled = os.getenv('AUTO_SHUTDOWN', 'false').lower() == 'true'
+        self.idle_timeout = int(os.getenv('IDLE_TIMEOUT_MINUTES', '15'))
+        self.auto_shutdown = os.getenv('AUTO_SHUTDOWN', 'false').lower() == 'true'
         
         self._load_tasks()
+        self._fix_zombie_tasks()
         
-        # Fix zombie tasks (tasks that were processing when server crashed)
+        if not test_mode:
+            self._init_whisper_model()
+            self._init_diarization()
+        else:
+            self.model = None
+            self.diarization_pipeline = None
+        
+        self._start_worker()
+        self._start_scheduler()
+        atexit.register(self._shutdown)
+
+    def _fix_zombie_tasks(self):
+        """Mark tasks that were processing when server crashed as errors."""
+        active_states = ('downloading', 'transcribing', 'analyzing', 'queued')
         with self.lock:
-            for t_id, task in self.tasks.items():
-                if task.get('status') in ['downloading', 'transcribing', 'analyzing', 'queued']:
-                    logger.warning(f"🧟 Found zombie task {t_id}, marking as error.")
+            for task_id, task in self.tasks.items():
+                if task.get('status') in active_states:
+                    logger.warning(f"Found zombie task {task_id}, marking as error")
                     task['status'] = 'error'
                     task['message'] = 'Server restarted during processing'
                     task['progress'] = 0
             self._save_tasks()
-        
-        # Load Whisper model (large-v3 for maximum quality)
-        if not test_mode:
-            # 🎮 Auto-detect GPU vs CPU
-            use_gpu = os.getenv('USE_GPU', 'false').lower() == 'true'
-            if torch and torch.cuda.is_available() and use_gpu:
-                device = "cuda"
-                compute_type = "float16"
-                logger.info(f"🎮 GPU Mode: {torch.cuda.get_device_name(0)}")
-            else:
-                device = "cpu"
-                compute_type = "int8"
-                # Use all CPU cores for local running
-                cpu_threads = int(os.getenv('CPU_THREADS', str(os.cpu_count() or 4)))
-                logger.info(f"💻 CPU Mode: Using {cpu_threads} threads")
-            
-            logger.info(f"🚀 Loading Faster-Whisper (Large-v3) on {device}...")
-            if device == "cuda":
-                self.model = WhisperModel("large-v3", device=device, compute_type=compute_type)
-            else:
-                cpu_threads = int(os.getenv('CPU_THREADS', str(os.cpu_count() or 4)))
-                self.model = WhisperModel("large-v3", device=device, compute_type=compute_type, cpu_threads=cpu_threads)
-            
-            # טעינת מודל זיהוי דוברים (אם יש טוקן וספריית pyannote זמינה)
-            self.diarization_pipeline = None
-            if self.hf_token and PYANNOTE_AVAILABLE:
-                logger.info("👥 Loading Speaker Diarization pipeline...")
-                try:
-                    self.diarization_pipeline = Pipeline.from_pretrained(
-                        "pyannote/speaker-diarization-3.1",
-                        use_auth_token=self.hf_token
-                    )
-                    # Force CPU mode to prevent CUDA errors
-                    if torch:
-                        self.diarization_pipeline.to(torch.device("cpu"))
-                    logger.info("✅ Diarization pipeline loaded successfully (CPU mode)")
-                except Exception as e:
-                    logger.warning(f"⚠️ Diarization disabled: {e}")
-            elif not PYANNOTE_AVAILABLE:
-                logger.info("ℹ️ Diarization disabled (pyannote.audio not installed)")
-        else:
-            self.model = None
 
+    def _init_whisper_model(self):
+        """Initialize Whisper model with GPU/CPU auto-detection."""
+        use_gpu = os.getenv('USE_GPU', 'false').lower() == 'true'
+        
+        if torch and torch.cuda.is_available() and use_gpu:
+            device = "cuda"
+            compute_type = "float16"
+            logger.info(f"GPU Mode: {torch.cuda.get_device_name(0)}")
+        else:
+            device = "cpu"
+            compute_type = "int8"
+            cpu_threads = int(os.getenv('CPU_THREADS', str(os.cpu_count() or 4)))
+            logger.info(f"CPU Mode: Using {cpu_threads} threads")
+        
+        logger.info(f"Loading Whisper model ({WHISPER_MODEL}) on {device}...")
+        
+        if device == "cuda":
+            self.model = WhisperModel(WHISPER_MODEL, device=device, compute_type=compute_type)
+        else:
+            cpu_threads = int(os.getenv('CPU_THREADS', str(os.cpu_count() or 4)))
+            self.model = WhisperModel(WHISPER_MODEL, device=device, compute_type=compute_type, cpu_threads=cpu_threads)
+
+    def _init_diarization(self):
+        """Initialize speaker diarization pipeline if available."""
+        self.diarization_pipeline = None
+        
+        if not self.hf_token:
+            logger.info("Diarization disabled (no HF_TOKEN)")
+            return
+            
+        if not PYANNOTE_AVAILABLE:
+            logger.info("Diarization disabled (pyannote.audio not installed)")
+            return
+        
+        logger.info("Loading speaker diarization pipeline...")
+        try:
+            self.diarization_pipeline = Pipeline.from_pretrained(
+                "pyannote/speaker-diarization-3.1",
+                use_auth_token=self.hf_token
+            )
+            if torch:
+                self.diarization_pipeline.to(torch.device("cpu"))
+            logger.info("Diarization loaded successfully")
+        except Exception as e:
+            logger.warning(f"Diarization disabled: {e}")
+
+    def _start_worker(self):
+        """Start background worker thread."""
         self.worker = threading.Thread(target=self._worker_loop, daemon=True)
         self.worker.start()
 
+    def _start_scheduler(self):
+        """Start background scheduler for cleanup and idle monitoring."""
         self.scheduler = BackgroundScheduler()
         self.scheduler.add_job(self._cleanup_old_files, 'interval', hours=1)
         
-        # Add idle monitoring job if AUTO_SHUTDOWN is enabled
-        if self.auto_shutdown_enabled:
-            logger.info(f"⏰ Idle Auto-Shutdown ENABLED: {self.idle_timeout_minutes} min timeout")
-            self.scheduler.add_job(self._check_idle_shutdown, 'interval', minutes=1)
-        else:
-            logger.info("⏰ Idle Auto-Shutdown DISABLED (set AUTO_SHUTDOWN=true to enable)")
+        if self.auto_shutdown:
+            logger.info(f"Auto-shutdown enabled: {self.idle_timeout} min timeout")
+            self.scheduler.add_job(self._check_idle, 'interval', minutes=1)
         
         self.scheduler.start()
-        
-        atexit.register(self._shutdown)
 
+    # --- Public API ---
+    
     def submit_task(self, url=None, file_path=None, test_mode=None):
+        """Submit a new transcription task. Returns task_id."""
         task_id = str(uuid.uuid4())
         with self.lock:
             self.tasks[task_id] = {
-                'status': 'queued', 'progress': 0, 'message': 'Waiting...',
-                'created_at': time.time(), 'url': url, 'filename': None
+                'status': 'queued',
+                'progress': 0,
+                'message': 'Waiting...',
+                'created_at': time.time(),
+                'url': url,
+                'filename': None
             }
         self.task_queue.put((task_id, url, file_path, test_mode))
         return task_id
 
     def get_status(self, task_id):
-        with self.lock: return self.tasks.get(task_id)
+        """Get current status of a task."""
+        with self.lock:
+            return self.tasks.get(task_id)
 
     def get_all_tasks(self):
-        with self.lock: return dict(self.tasks)
+        """Get all tasks (for history view)."""
+        with self.lock:
+            return dict(self.tasks)
+
+    # --- Worker Logic ---
 
     def _worker_loop(self):
+        """Main worker loop - processes tasks from queue."""
         while True:
             task_id, url, file_path, test_mode = self.task_queue.get()
             try:
                 self._process_task(task_id, url, file_path, test_mode)
             except Exception as e:
-                logger.error(f"Task failed: {e}")
-                self._update(task_id, 'error', 0, str(e))
+                logger.error(f"Task {task_id} failed: {e}")
+                self._update_task(task_id, 'error', 0, str(e))
             finally:
                 self.task_queue.task_done()
 
     def _process_task(self, task_id, url, file_path, test_mode):
-        download_folder = "downloads"
-        os.makedirs(download_folder, exist_ok=True)
+        """Process a single transcription task."""
+        os.makedirs(DOWNLOAD_FOLDER, exist_ok=True)
         
-        # בדיקת מצב בדיקה - החזרת תוצאה מדומה
+        # Test mode - return dummy data
         if test_mode or self.test_mode:
-            logger.info("🧪 Running in TEST MODE - simulating transcription")
-            self._update(task_id, 'downloading', 10, '[TEST] Simulating download...')
-            time.sleep(0.5)
-            self._update(task_id, 'transcribing', 50, '[TEST] Simulating transcription...')
-            time.sleep(0.5)
-            self._update(task_id, 'completed', 100, '[TEST] Done!',
-                         filename='test_output.txt',
-                         text='This is a simulated test transcription.',
-                         summary={'title': 'Test', 'summary': 'Test summary', 'tags': ['test']},
-                         segments=[{'start': 0, 'end': 1, 'text': 'Test segment', 'speaker': 'SPEAKER_00'}])
+            self._run_test_mode(task_id)
             return
         
-        # שלב 1: הורדה - ⚙️ Direct Audio Pipeline (WAV 16kHz Mono)
-        self._update(task_id, 'downloading', 10, 'Downloading (optimized WAV)...')
-        audio_file = file_path
-        if url:
-            # Download and convert directly to WAV (16kHz, Mono) in a single step
-            ydl_opts = {
-                'format': 'bestaudio/best',
-                'outtmpl': os.path.join(download_folder, '%(id)s.%(ext)s'),
-                'postprocessors': [{
-                    'key': 'FFmpegExtractAudio',
-                    'preferredcodec': 'wav',
-                    'preferredquality': '0',
-                }],
-                'postprocessor_args': [
-                    '-ar', '16000',  # 16kHz sample rate
-                    '-ac', '1',       # Mono channel
-                ],
-            }
-            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                info = ydl.extract_info(url, download=True)
-                audio_file = ydl.prepare_filename(info).rsplit('.', 1)[0] + ".wav"
+        # Step 1: Download audio
+        audio_file = self._download_audio(task_id, url, file_path)
+        
+        # Step 2: Transcribe
+        segments, full_text = self._transcribe(task_id, audio_file)
+        
+        # Step 3: Speaker diarization (optional)
+        if self.diarization_pipeline:
+            self._identify_speakers(task_id, audio_file, segments)
+        
+        # Step 4: AI summary
+        self._update_task(task_id, 'analyzing', 90, 'Generating summary...')
+        summary = self._generate_summary(full_text)
+        
+        # Save results
+        self._save_results(audio_file, segments, full_text)
+        self._update_task(
+            task_id, 'completed', 100, 'Done!',
+            filename=audio_file.replace('.wav', '.txt'),
+            text=full_text,
+            summary=summary,
+            segments=segments
+        )
+        
+        # Cleanup downloaded file
+        if url and os.path.exists(audio_file):
+            os.remove(audio_file)
 
-        # שלב 2: תמלול מהיר - 🚀 VAD Filter enabled to skip silence
-        self._update(task_id, 'transcribing', 30, 'Transcribing (Large-v3 + VAD)...')
-        segments, _ = self.model.transcribe(
+    def _run_test_mode(self, task_id):
+        """Simulate transcription for testing."""
+        logger.info("Running in TEST MODE")
+        self._update_task(task_id, 'downloading', 10, '[TEST] Simulating...')
+        time.sleep(0.5)
+        self._update_task(task_id, 'transcribing', 50, '[TEST] Processing...')
+        time.sleep(0.5)
+        self._update_task(
+            task_id, 'completed', 100, '[TEST] Done!',
+            filename='test_output.txt',
+            text='Test transcription content.',
+            summary={'title': 'Test', 'summary': 'Test summary', 'tags': ['test']},
+            segments=[{'start': 0, 'end': 1, 'text': 'Test', 'speaker': 'SPEAKER_00'}]
+        )
+
+    def _download_audio(self, task_id, url, file_path):
+        """Download and convert audio to WAV format."""
+        self._update_task(task_id, 'downloading', 10, 'Downloading...')
+        
+        if file_path:
+            return file_path
+        
+        # TODO: Add support for direct MP4 file handling
+        ydl_opts = {
+            'format': 'bestaudio/best',
+            'outtmpl': os.path.join(DOWNLOAD_FOLDER, '%(id)s.%(ext)s'),
+            'postprocessors': [{
+                'key': 'FFmpegExtractAudio',
+                'preferredcodec': 'wav',
+                'preferredquality': '0',
+            }],
+            'postprocessor_args': ['-ar', '16000', '-ac', '1'],
+        }
+        
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(url, download=True)
+            return ydl.prepare_filename(info).rsplit('.', 1)[0] + ".wav"
+
+    def _transcribe(self, task_id, audio_file):
+        """Run Whisper transcription."""
+        self._update_task(task_id, 'transcribing', 30, 'Transcribing...')
+        
+        segments_gen, _ = self.model.transcribe(
             audio_file,
             beam_size=1,
-            language="he",
+            language=DEFAULT_LANGUAGE,
             vad_filter=True,
             vad_parameters={"min_silence_duration_ms": 500}
         )
         
-        # המרת הסגמנטים לרשימה נוחה
-        transcript_data = []
+        segments = []
         full_text = ""
-        for seg in segments:
-            transcript_data.append({
-                "start": seg.start, "end": seg.end, "text": seg.text.strip(), "speaker": "UNKNOWN"
+        for seg in segments_gen:
+            segments.append({
+                "start": seg.start,
+                "end": seg.end,
+                "text": seg.text.strip(),
+                "speaker": "UNKNOWN"
             })
             full_text += seg.text + " "
-
-        # שלב 3: זיהוי דוברים (אם קיים) - ⚙️ No conversion needed, already WAV!
-        if self.diarization_pipeline:
-            self._update(task_id, 'transcribing', 60, 'Identifying Speakers...')
-            try:
-                # Audio is already optimized WAV (16kHz, Mono) - no conversion needed!
-                diarization = self.diarization_pipeline(audio_file)
-                
-                # מיזוג דוברים עם טקסט
-                for segment in transcript_data:
-                    # בדיקה מי הדובר הדומיננטי בזמן הזה
-                    mid_time = (segment["start"] + segment["end"]) / 2
-                    best_speaker = "UNKNOWN"
-                    for turn, _, speaker in diarization.itertracks(yield_label=True):
-                        if turn.start <= mid_time <= turn.end:
-                            best_speaker = speaker
-                            break
-                    segment["speaker"] = best_speaker
-            except Exception as e:
-                logger.error(f"Diarization error: {e}")
-
-        # שלב 4: סיכום AI
-        self._update(task_id, 'analyzing', 90, 'Generating Summary...')
-        ai_summary = self._analyze_with_gemini(full_text, audio_file)
-
-        # שמירה וסיום
-        self._save_results(audio_file, transcript_data, full_text)
-        self._update(task_id, 'completed', 100, 'Done!', 
-                     filename=audio_file.replace('.wav', '.txt'),
-                     text=full_text, summary=ai_summary, segments=transcript_data)
         
-        if url and os.path.exists(audio_file): os.remove(audio_file)
+        return segments, full_text.strip()
 
-    def _update(self, task_id, status, progress, message, **kwargs):
+    def _identify_speakers(self, task_id, audio_file, segments):
+        """Run speaker diarization and merge with transcription."""
+        self._update_task(task_id, 'transcribing', 60, 'Identifying speakers...')
+        
+        try:
+            diarization = self.diarization_pipeline(audio_file)
+            
+            for segment in segments:
+                mid_time = (segment["start"] + segment["end"]) / 2
+                for turn, _, speaker in diarization.itertracks(yield_label=True):
+                    if turn.start <= mid_time <= turn.end:
+                        segment["speaker"] = speaker
+                        break
+        except Exception as e:
+            logger.error(f"Diarization error: {e}")
+
+    def _generate_summary(self, text):
+        """Generate AI summary using Gemini."""
+        api_key = os.getenv('GOOGLE_API_KEY')
+        if not api_key:
+            return None
+        
+        try:
+            genai.configure(api_key=api_key)
+            model = genai.GenerativeModel('gemini-1.5-flash')
+            prompt = f"Analyze this Hebrew text. Return JSON {{'title': '', 'summary': '', 'tags': []}}: {text[:8000]}"
+            response = model.generate_content(prompt)
+            return json.loads(response.text.replace('```json', '').replace('```', ''))
+        except Exception:
+            return None
+
+    # --- Internal Helpers ---
+
+    def _update_task(self, task_id, status, progress, message, **kwargs):
+        """Update task status in memory and persist to disk."""
         with self.lock:
-            self.tasks[task_id].update({'status': status, 'progress': progress, 'message': message, **kwargs})
+            self.tasks[task_id].update({
+                'status': status,
+                'progress': progress,
+                'message': message,
+                **kwargs
+            })
         self._save_tasks()
 
     def _save_tasks(self):
-        with open(self.TASKS_FILE, 'w') as f: json.dump(self.tasks, f)
+        """Persist tasks to JSON file."""
+        with open(TASKS_FILE, 'w') as f:
+            json.dump(self.tasks, f)
 
     def _load_tasks(self):
-        if os.path.exists(self.TASKS_FILE):
+        """Load tasks from JSON file."""
+        if os.path.exists(TASKS_FILE):
             try:
-                with open(self.TASKS_FILE, 'r') as f: self.tasks = json.load(f)
-            except: self.tasks = {}
-
-    def _analyze_with_gemini(self, text, filename):
-        if not os.getenv('GOOGLE_API_KEY'): return None
-        try:
-            genai.configure(api_key=os.getenv('GOOGLE_API_KEY'))
-            model = genai.GenerativeModel('gemini-1.5-flash')
-            resp = model.generate_content(f"Analyze this Hebrew text. Return JSON {{'title': '', 'summary': '', 'tags': []}}: {text[:8000]}")
-            return json.loads(resp.text.replace('```json', '').replace('```', ''))
-        except: return None
+                with open(TASKS_FILE, 'r') as f:
+                    self.tasks = json.load(f)
+            except (json.JSONDecodeError, IOError):
+                self.tasks = {}
 
     def _save_results(self, filename, segments, text):
+        """Save transcript text and segments to files."""
         base = os.path.splitext(filename)[0]
-        with open(f"{base}.txt", 'w', encoding='utf-8') as f: f.write(text)
-        with open(f"{base}_segments.json", 'w', encoding='utf-8') as f: json.dump({'segments': segments}, f)
+        with open(f"{base}.txt", 'w', encoding='utf-8') as f:
+            f.write(text)
+        with open(f"{base}_segments.json", 'w', encoding='utf-8') as f:
+            json.dump({'segments': segments}, f, ensure_ascii=False)
+
+    # --- Maintenance ---
 
     def _cleanup_old_files(self):
-        """Delete old files to prevent disk full errors"""
-        logger.info("🧹 Running disk cleanup...")
-        retention_hours = int(os.getenv('CLEANUP_RETENTION_HOURS', '24'))
-        now = time.time()
+        """Delete files older than retention period."""
+        logger.info("Running disk cleanup...")
+        retention = int(os.getenv('CLEANUP_RETENTION_HOURS', str(CLEANUP_RETENTION_HOURS)))
+        cutoff = time.time() - (retention * 3600)
+        deleted = 0
         
-        download_folder = "downloads"
-        count = 0
-        if os.path.exists(download_folder):
-            for filename in os.listdir(download_folder):
-                file_path = os.path.join(download_folder, filename)
-                # Delete files older than retention period
-                if os.path.isfile(file_path) and os.path.getmtime(file_path) < now - (retention_hours * 3600):
+        if os.path.exists(DOWNLOAD_FOLDER):
+            for fname in os.listdir(DOWNLOAD_FOLDER):
+                fpath = os.path.join(DOWNLOAD_FOLDER, fname)
+                if os.path.isfile(fpath) and os.path.getmtime(fpath) < cutoff:
                     try:
-                        os.remove(file_path)
-                        count += 1
-                        logger.debug(f"🧹 Deleted old file: {filename}")
-                    except Exception as e:
-                        logger.error(f"Error deleting {filename}: {e}")
+                        os.remove(fpath)
+                        deleted += 1
+                    except OSError as e:
+                        logger.error(f"Error deleting {fname}: {e}")
         
-        logger.info(f"🧹 Cleanup finished. Deleted {count} files.")
-    
-    def _get_active_task_count(self):
-        """Count tasks that are still in progress (not completed/error)"""
+        logger.info(f"Cleanup complete: deleted {deleted} files")
+
+    def _check_idle(self):
+        """Check if server should auto-shutdown due to idle timeout."""
         with self.lock:
-            active = sum(1 for t in self.tasks.values() 
-                        if t.get('status') not in ('completed', 'error'))
-        return active
-    
-    def _check_idle_shutdown(self):
-        """Check if server has been idle long enough to trigger shutdown"""
-        active_tasks = self._get_active_task_count()
-        queue_size = self.task_queue.qsize()
+            active = sum(1 for t in self.tasks.values() if t.get('status') not in ('completed', 'error'))
         
-        if active_tasks == 0 and queue_size == 0:
+        if active == 0 and self.task_queue.qsize() == 0:
             idle_minutes = (time.time() - self.idle_start_time) / 60
-            logger.info(f"⏰ Server idle for {idle_minutes:.1f} minutes (threshold: {self.idle_timeout_minutes} min)")
             
-            if idle_minutes >= self.idle_timeout_minutes:
+            if idle_minutes >= self.idle_timeout:
                 self._trigger_shutdown()
         else:
-            # Reset idle timer when there's activity
             self.idle_start_time = time.time()
-            logger.debug(f"⏰ Active: {active_tasks} tasks, {queue_size} queued - idle timer reset")
-    
+
     def _trigger_shutdown(self):
-        """Trigger server shutdown (DRY-RUN: only logs by default)"""
+        """Trigger server shutdown (respects DRY_RUN setting)."""
         dry_run = os.getenv('SHUTDOWN_DRY_RUN', 'true').lower() == 'true'
         
         if dry_run:
-            logger.warning("🔴 SHUTDOWN TRIGGERED (DRY-RUN MODE - no actual shutdown)")
-            logger.warning("🔴 To enable real shutdown, set SHUTDOWN_DRY_RUN=false")
+            logger.warning("SHUTDOWN TRIGGERED (DRY-RUN - no actual shutdown)")
         else:
-            logger.warning("🔴 INITIATING SERVER SHUTDOWN due to idle timeout...")
-            logger.warning("🔴 Server will shut down in 10 seconds...")
-            # Give time for logs to flush
+            logger.warning("INITIATING SERVER SHUTDOWN...")
             time.sleep(10)
             os.system("shutdown -h now")
 
     def _shutdown(self):
+        """Cleanup on application exit."""
         self.scheduler.shutdown(wait=False)
