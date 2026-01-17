@@ -38,7 +38,7 @@ logger = logging.getLogger(__name__)
 # Configuration constants
 TASKS_FILE = "tasks_state.json"
 DOWNLOAD_FOLDER = "downloads"
-WHISPER_MODEL = "large-v3"
+WHISPER_MODEL = "medium"  # Options: tiny, small, medium, large-v3
 DEFAULT_LANGUAGE = "he"
 CLEANUP_RETENTION_HOURS = 24
 
@@ -127,7 +127,7 @@ class TranscriptionManager:
         try:
             self.diarization_pipeline = Pipeline.from_pretrained(
                 "pyannote/speaker-diarization-3.1",
-                use_auth_token=self.hf_token
+                token=self.hf_token  # Changed from use_auth_token
             )
             if torch:
                 self.diarization_pipeline.to(torch.device("cpu"))
