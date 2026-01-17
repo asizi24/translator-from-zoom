@@ -55,10 +55,25 @@ class TranscriptionManager:
         
         # Load Whisper model (large-v3 for maximum quality)
         if not test_mode:
-            # 🧵 Hardware-Matched Threading: 2 vCPUs on m7i-flex.large
-            cpu_threads = int(os.getenv('CPU_THREADS', '2'))
-            logger.info(f"🚀 Loading Faster-Whisper (Large-v3) with {cpu_threads} CPU threads...")
-            self.model = WhisperModel("large-v3", device="cpu", compute_type="int8", cpu_threads=cpu_threads)
+            # 🎮 Auto-detect GPU vs CPU
+            use_gpu = os.getenv('USE_GPU', 'false').lower() == 'true'
+            if torch and torch.cuda.is_available() and use_gpu:
+                device = "cuda"
+                compute_type = "float16"
+                logger.info(f"🎮 GPU Mode: {torch.cuda.get_device_name(0)}")
+            else:
+                device = "cpu"
+                compute_type = "int8"
+                # Use all CPU cores for local running
+                cpu_threads = int(os.getenv('CPU_THREADS', str(os.cpu_count() or 4)))
+                logger.info(f"💻 CPU Mode: Using {cpu_threads} threads")
+            
+            logger.info(f"🚀 Loading Faster-Whisper (Large-v3) on {device}...")
+            if device == "cuda":
+                self.model = WhisperModel("large-v3", device=device, compute_type=compute_type)
+            else:
+                cpu_threads = int(os.getenv('CPU_THREADS', str(os.cpu_count() or 4)))
+                self.model = WhisperModel("large-v3", device=device, compute_type=compute_type, cpu_threads=cpu_threads)
             
             # טעינת מודל זיהוי דוברים (אם יש טוקן וספריית pyannote זמינה)
             self.diarization_pipeline = None

@@ -4,6 +4,32 @@
 
 ---
 
+## ⚡ Quick Start (הרצה לוקאלית - הכי מהיר!)
+
+### Windows - בשני קליקים
+
+1. **הורידו** את הפרויקט: `git clone https://github.com/asizi24/translator-from-zoom.git`
+2. **לחצו פעמיים** על `install.bat` (התקנה חד-פעמית)
+3. **לחצו פעמיים** על `start.bat` (הפעלה)
+
+### כל מערכת הפעלה
+
+```bash
+git clone https://github.com/asizi24/translator-from-zoom.git
+cd translator-from-zoom
+pip install -r requirements.txt
+python run_local.py
+```
+
+### 🎮 יש לכם כרטיס NVIDIA? (12x יותר מהיר!)
+
+```bash
+# התקינו PyTorch עם CUDA:
+pip install torch --index-url https://download.pytorch.org/whl/cu118
+```
+
+---
+
 ## 🐳 התקנה עם Docker (מומלץ)
 
 ### דרישות מקדימות
