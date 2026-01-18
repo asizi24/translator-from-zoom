@@ -17,7 +17,7 @@ class NeuralVisualizer {
         this.ctx = null;
         this.particles = [];
         this.mouse = { x: null, y: null, radius: 150 };
-        this.particleCount = 100;
+        this.particleCount = 50; // Reduced for better performance
 
         // Audio properties
         this.audioContext = null;

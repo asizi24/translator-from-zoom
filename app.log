@@ -96,3 +96,466 @@
 2026-01-14 11:37:43 [INFO] __main__: Server running on http://0.0.0.0:5000
 2026-01-14 11:37:43 [INFO] __main__: Debug mode: False
 2026-01-14 11:37:43 [WARNING] __main__: Running in PRODUCTION mode. Consider using a WSGI server (Gunicorn/Waitress) for production.
+2026-01-17 23:03:04 [INFO] app: Folder ready: uploads
+2026-01-17 23:03:04 [INFO] app: Folder ready: downloads
+2026-01-17 23:03:04 [INFO] app: Initializing TranscriptionManager...
+2026-01-17 23:03:04 [INFO] transcriber_engine: CPU Mode: Using 14 threads
+2026-01-17 23:03:04 [INFO] transcriber_engine: Loading Whisper model (large-v3) on cpu...
+2026-01-17 23:03:05 [INFO] httpx: HTTP Request: GET https://huggingface.co/api/models/Systran/faster-whisper-large-v3/revision/main "HTTP/1.1 200 OK"
+2026-01-17 23:03:05 [INFO] httpx: HTTP Request: HEAD https://huggingface.co/Systran/faster-whisper-large-v3/resolve/edaa852ec7e145841d8ffdb056a99866b5f0a478/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-01-17 23:03:05 [INFO] httpx: HTTP Request: HEAD https://huggingface.co/Systran/faster-whisper-large-v3/resolve/edaa852ec7e145841d8ffdb056a99866b5f0a478/tokenizer.json "HTTP/1.1 307 Temporary Redirect"
+2026-01-17 23:03:05 [INFO] httpx: HTTP Request: HEAD https://huggingface.co/Systran/faster-whisper-large-v3/resolve/edaa852ec7e145841d8ffdb056a99866b5f0a478/preprocessor_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-01-17 23:03:05 [INFO] httpx: HTTP Request: HEAD https://huggingface.co/Systran/faster-whisper-large-v3/resolve/edaa852ec7e145841d8ffdb056a99866b5f0a478/model.bin "HTTP/1.1 302 Found"
+2026-01-17 23:03:05 [INFO] httpx: HTTP Request: HEAD https://huggingface.co/Systran/faster-whisper-large-v3/resolve/edaa852ec7e145841d8ffdb056a99866b5f0a478/vocabulary.json "HTTP/1.1 307 Temporary Redirect"
+2026-01-17 23:03:05 [INFO] httpx: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/Systran/faster-whisper-large-v3/edaa852ec7e145841d8ffdb056a99866b5f0a478/config.json "HTTP/1.1 200 OK"
+2026-01-17 23:03:06 [INFO] httpx: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/Systran/faster-whisper-large-v3/edaa852ec7e145841d8ffdb056a99866b5f0a478/preprocessor_config.json "HTTP/1.1 200 OK"
+2026-01-17 23:03:06 [INFO] httpx: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/Systran/faster-whisper-large-v3/edaa852ec7e145841d8ffdb056a99866b5f0a478/tokenizer.json "HTTP/1.1 200 OK"
+2026-01-17 23:03:06 [INFO] httpx: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/Systran/faster-whisper-large-v3/edaa852ec7e145841d8ffdb056a99866b5f0a478/vocabulary.json "HTTP/1.1 200 OK"
+2026-01-17 23:03:06 [INFO] httpx: HTTP Request: GET https://huggingface.co/api/models/Systran/faster-whisper-large-v3/xet-read-token/edaa852ec7e145841d8ffdb056a99866b5f0a478 "HTTP/1.1 200 OK"
+2026-01-17 23:03:06 [INFO] httpx: HTTP Request: GET https://huggingface.co/api/resolve-cache/models/Systran/faster-whisper-large-v3/edaa852ec7e145841d8ffdb056a99866b5f0a478/config.json "HTTP/1.1 200 OK"
+2026-01-17 23:03:06 [INFO] httpx: HTTP Request: GET https://huggingface.co/api/resolve-cache/models/Systran/faster-whisper-large-v3/edaa852ec7e145841d8ffdb056a99866b5f0a478/tokenizer.json "HTTP/1.1 200 OK"
+2026-01-17 23:03:06 [INFO] httpx: HTTP Request: GET https://huggingface.co/api/resolve-cache/models/Systran/faster-whisper-large-v3/edaa852ec7e145841d8ffdb056a99866b5f0a478/vocabulary.json "HTTP/1.1 200 OK"
+2026-01-17 23:03:06 [INFO] httpx: HTTP Request: GET https://huggingface.co/api/resolve-cache/models/Systran/faster-whisper-large-v3/edaa852ec7e145841d8ffdb056a99866b5f0a478/preprocessor_config.json "HTTP/1.1 200 OK"
+2026-01-17 23:04:13 [INFO] __main__: Folder ready: uploads
+2026-01-17 23:04:13 [INFO] __main__: Folder ready: downloads
+2026-01-17 23:04:13 [INFO] __main__: Initializing TranscriptionManager...
+2026-01-17 23:04:13 [INFO] transcriber_engine: CPU Mode: Using 16 threads
+2026-01-17 23:04:13 [INFO] transcriber_engine: Loading Whisper model (large-v3) on cpu...
+2026-01-17 23:04:14 [INFO] httpx: HTTP Request: GET https://huggingface.co/api/models/Systran/faster-whisper-large-v3/revision/main "HTTP/1.1 200 OK"
+2026-01-17 23:04:14 [INFO] httpx: HTTP Request: HEAD https://huggingface.co/Systran/faster-whisper-large-v3/resolve/edaa852ec7e145841d8ffdb056a99866b5f0a478/model.bin "HTTP/1.1 302 Found"
+2026-01-17 23:04:14 [INFO] httpx: HTTP Request: GET https://huggingface.co/api/models/Systran/faster-whisper-large-v3/xet-read-token/edaa852ec7e145841d8ffdb056a99866b5f0a478 "HTTP/1.1 200 OK"
+2026-01-17 23:05:45 [INFO] transcriber_engine: Loading speaker diarization pipeline...
+2026-01-17 23:05:45 [WARNING] transcriber_engine: Diarization disabled: Pipeline.from_pretrained() got an unexpected keyword argument 'use_auth_token'
+2026-01-17 23:05:45 [INFO] apscheduler.scheduler: Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-01-17 23:05:45 [INFO] transcriber_engine: Auto-shutdown enabled: 15 min timeout
+2026-01-17 23:05:45 [INFO] apscheduler.scheduler: Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-01-17 23:05:45 [INFO] apscheduler.scheduler: Added job "TranscriptionManager._cleanup_old_files" to job store "default"
+2026-01-17 23:05:45 [INFO] apscheduler.scheduler: Added job "TranscriptionManager._check_idle" to job store "default"
+2026-01-17 23:05:45 [INFO] apscheduler.scheduler: Scheduler started
+2026-01-17 23:05:45 [INFO] __main__: Google Gemini API configured
+2026-01-17 23:05:45 [INFO] __main__: ============================================================
+2026-01-17 23:05:45 [INFO] __main__: ============================================================
+2026-01-17 23:05:45 [INFO] __main__: Validating environment...
+2026-01-17 23:05:45 [INFO] __main__: Environment: development
+2026-01-17 23:05:45 [INFO] __main__: Debug mode: True
+2026-01-17 23:05:45 [INFO] __main__: Upload folder: uploads
+2026-01-17 23:05:45 [INFO] __main__: Download folder: downloads
+2026-01-17 23:05:45 [INFO] __main__: AI features: Enabled
+2026-01-17 23:05:45 [INFO] __main__: Speaker diarization: Enabled
+2026-01-17 23:05:45 [INFO] __main__: Server running on http://0.0.0.0:5000
+2026-01-17 23:05:45 [INFO] __main__: Debug mode: True
+2026-01-17 23:05:53 [INFO] __main__: Folder ready: uploads
+2026-01-17 23:05:53 [INFO] __main__: Folder ready: downloads
+2026-01-17 23:05:53 [INFO] __main__: Initializing TranscriptionManager...
+2026-01-17 23:05:53 [INFO] transcriber_engine: CPU Mode: Using 16 threads
+2026-01-17 23:05:53 [INFO] transcriber_engine: Loading Whisper model (large-v3) on cpu...
+2026-01-17 23:05:54 [INFO] httpx: HTTP Request: GET https://huggingface.co/api/models/Systran/faster-whisper-large-v3/revision/main "HTTP/1.1 200 OK"
+2026-01-17 23:06:01 [INFO] transcriber_engine: Loading speaker diarization pipeline...
+2026-01-17 23:06:01 [WARNING] transcriber_engine: Diarization disabled: Pipeline.from_pretrained() got an unexpected keyword argument 'use_auth_token'
+2026-01-17 23:06:01 [INFO] apscheduler.scheduler: Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-01-17 23:06:01 [INFO] transcriber_engine: Auto-shutdown enabled: 15 min timeout
+2026-01-17 23:06:01 [INFO] apscheduler.scheduler: Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-01-17 23:06:01 [INFO] apscheduler.scheduler: Added job "TranscriptionManager._cleanup_old_files" to job store "default"
+2026-01-17 23:06:01 [INFO] apscheduler.scheduler: Added job "TranscriptionManager._check_idle" to job store "default"
+2026-01-17 23:06:01 [INFO] apscheduler.scheduler: Scheduler started
+2026-01-17 23:06:01 [INFO] __main__: Google Gemini API configured
+2026-01-17 23:06:01 [INFO] __main__: ============================================================
+2026-01-17 23:06:01 [INFO] __main__: ============================================================
+2026-01-17 23:06:01 [INFO] __main__: Validating environment...
+2026-01-17 23:06:01 [INFO] __main__: Environment: development
+2026-01-17 23:06:01 [INFO] __main__: Debug mode: True
+2026-01-17 23:06:01 [INFO] __main__: Upload folder: uploads
+2026-01-17 23:06:01 [INFO] __main__: Download folder: downloads
+2026-01-17 23:06:01 [INFO] __main__: AI features: Enabled
+2026-01-17 23:06:01 [INFO] __main__: Speaker diarization: Enabled
+2026-01-17 23:06:01 [INFO] __main__: Server running on http://0.0.0.0:5000
+2026-01-17 23:06:01 [INFO] __main__: Debug mode: True
+2026-01-17 23:06:01 [WARNING] werkzeug:  * Debugger is active!
+2026-01-17 23:06:45 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:07:45 IST)" (scheduled at 2026-01-17 23:06:45.396861+02:00)
+2026-01-17 23:06:45 [INFO] apscheduler.executors.default: Job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:07:45 IST)" executed successfully
+2026-01-17 23:07:01 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:08:01 IST)" (scheduled at 2026-01-17 23:07:01.434222+02:00)
+2026-01-17 23:07:01 [INFO] apscheduler.executors.default: Job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:08:01 IST)" executed successfully
+2026-01-17 23:07:24 [INFO] faster_whisper: Processing audio with duration 02:11:46.091
+2026-01-17 23:07:45 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:08:45 IST)" (scheduled at 2026-01-17 23:07:45.396861+02:00)
+2026-01-17 23:07:45 [INFO] apscheduler.executors.default: Job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:08:45 IST)" executed successfully
+2026-01-17 23:08:01 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:09:01 IST)" (scheduled at 2026-01-17 23:08:01.434222+02:00)
+2026-01-17 23:08:01 [INFO] apscheduler.executors.default: Job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:09:01 IST)" executed successfully
+2026-01-17 23:08:45 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:09:45 IST)" (scheduled at 2026-01-17 23:08:45.396861+02:00)
+2026-01-17 23:08:45 [INFO] apscheduler.executors.default: Job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:09:45 IST)" executed successfully
+2026-01-17 23:09:01 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:10:01 IST)" (scheduled at 2026-01-17 23:09:01.434222+02:00)
+2026-01-17 23:09:01 [INFO] apscheduler.executors.default: Job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:10:01 IST)" executed successfully
+2026-01-17 23:09:38 [INFO] faster_whisper: VAD filter removed 16:24.144 of audio
+2026-01-17 23:09:45 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:10:45 IST)" (scheduled at 2026-01-17 23:09:45.396861+02:00)
+2026-01-17 23:09:45 [INFO] apscheduler.executors.default: Job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:10:45 IST)" executed successfully
+2026-01-17 23:10:01 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:11:01 IST)" (scheduled at 2026-01-17 23:10:01.434222+02:00)
+2026-01-17 23:10:01 [INFO] apscheduler.executors.default: Job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:11:01 IST)" executed successfully
+2026-01-17 23:10:45 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:11:45 IST)" (scheduled at 2026-01-17 23:10:45.396861+02:00)
+2026-01-17 23:10:45 [INFO] apscheduler.executors.default: Job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:11:45 IST)" executed successfully
+2026-01-17 23:11:01 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:12:01 IST)" (scheduled at 2026-01-17 23:11:01.434222+02:00)
+2026-01-17 23:11:01 [INFO] apscheduler.executors.default: Job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:12:01 IST)" executed successfully
+2026-01-17 23:11:38 [INFO] apscheduler.scheduler: Scheduler has been shut down
+2026-01-17 23:11:45 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:12:45 IST)" (scheduled at 2026-01-17 23:11:45.396861+02:00)
+2026-01-17 23:11:45 [INFO] apscheduler.executors.default: Job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:12:45 IST)" executed successfully
+2026-01-17 23:12:45 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:13:45 IST)" (scheduled at 2026-01-17 23:12:45.396861+02:00)
+2026-01-17 23:12:45 [INFO] apscheduler.executors.default: Job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:13:45 IST)" executed successfully
+2026-01-17 23:12:51 [INFO] __main__: Folder ready: uploads
+2026-01-17 23:12:51 [INFO] __main__: Folder ready: downloads
+2026-01-17 23:12:51 [INFO] __main__: Initializing TranscriptionManager...
+2026-01-17 23:12:51 [WARNING] transcriber_engine: Found zombie task 8af954fe-c608-4db2-a410-21e7239b09db, marking as error
+2026-01-17 23:12:51 [INFO] transcriber_engine: CPU Mode: Using 16 threads
+2026-01-17 23:12:51 [INFO] transcriber_engine: Loading Whisper model (medium) on cpu...
+2026-01-17 23:12:53 [INFO] httpx: HTTP Request: GET https://huggingface.co/api/models/Systran/faster-whisper-medium/revision/main "HTTP/1.1 200 OK"
+2026-01-17 23:12:54 [INFO] httpx: HTTP Request: HEAD https://huggingface.co/Systran/faster-whisper-medium/resolve/08e178d48790749d25932bbc082711ddcfdfbc4f/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-01-17 23:12:54 [INFO] httpx: HTTP Request: HEAD https://huggingface.co/Systran/faster-whisper-medium/resolve/08e178d48790749d25932bbc082711ddcfdfbc4f/model.bin "HTTP/1.1 302 Found"
+2026-01-17 23:12:54 [INFO] httpx: HTTP Request: HEAD https://huggingface.co/Systran/faster-whisper-medium/resolve/08e178d48790749d25932bbc082711ddcfdfbc4f/tokenizer.json "HTTP/1.1 307 Temporary Redirect"
+2026-01-17 23:12:54 [INFO] httpx: HTTP Request: HEAD https://huggingface.co/Systran/faster-whisper-medium/resolve/08e178d48790749d25932bbc082711ddcfdfbc4f/vocabulary.txt "HTTP/1.1 307 Temporary Redirect"
+2026-01-17 23:12:54 [INFO] httpx: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/Systran/faster-whisper-medium/08e178d48790749d25932bbc082711ddcfdfbc4f/config.json "HTTP/1.1 200 OK"
+2026-01-17 23:12:54 [INFO] httpx: HTTP Request: GET https://huggingface.co/api/models/Systran/faster-whisper-medium/xet-read-token/08e178d48790749d25932bbc082711ddcfdfbc4f "HTTP/1.1 200 OK"
+2026-01-17 23:12:54 [INFO] httpx: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/Systran/faster-whisper-medium/08e178d48790749d25932bbc082711ddcfdfbc4f/vocabulary.txt "HTTP/1.1 200 OK"
+2026-01-17 23:12:54 [INFO] httpx: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/Systran/faster-whisper-medium/08e178d48790749d25932bbc082711ddcfdfbc4f/tokenizer.json "HTTP/1.1 200 OK"
+2026-01-17 23:12:54 [INFO] httpx: HTTP Request: GET https://huggingface.co/api/resolve-cache/models/Systran/faster-whisper-medium/08e178d48790749d25932bbc082711ddcfdfbc4f/config.json "HTTP/1.1 200 OK"
+2026-01-17 23:12:54 [INFO] httpx: HTTP Request: GET https://huggingface.co/api/resolve-cache/models/Systran/faster-whisper-medium/08e178d48790749d25932bbc082711ddcfdfbc4f/vocabulary.txt "HTTP/1.1 200 OK"
+2026-01-17 23:12:54 [INFO] httpx: HTTP Request: GET https://huggingface.co/api/resolve-cache/models/Systran/faster-whisper-medium/08e178d48790749d25932bbc082711ddcfdfbc4f/tokenizer.json "HTTP/1.1 200 OK"
+2026-01-17 23:13:45 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:14:45 IST)" (scheduled at 2026-01-17 23:13:45.396861+02:00)
+2026-01-17 23:13:45 [INFO] apscheduler.executors.default: Job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:14:45 IST)" executed successfully
+2026-01-17 23:14:08 [INFO] transcriber_engine: Loading speaker diarization pipeline...
+2026-01-17 23:14:08 [WARNING] transcriber_engine: Diarization disabled: Pipeline.from_pretrained() got an unexpected keyword argument 'use_auth_token'
+2026-01-17 23:14:08 [INFO] apscheduler.scheduler: Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-01-17 23:14:08 [INFO] transcriber_engine: Auto-shutdown enabled: 15 min timeout
+2026-01-17 23:14:08 [INFO] apscheduler.scheduler: Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-01-17 23:14:08 [INFO] apscheduler.scheduler: Added job "TranscriptionManager._cleanup_old_files" to job store "default"
+2026-01-17 23:14:08 [INFO] apscheduler.scheduler: Added job "TranscriptionManager._check_idle" to job store "default"
+2026-01-17 23:14:08 [INFO] apscheduler.scheduler: Scheduler started
+2026-01-17 23:14:08 [INFO] __main__: Google Gemini API configured
+2026-01-17 23:14:08 [INFO] __main__: ============================================================
+2026-01-17 23:14:08 [INFO] __main__: ============================================================
+2026-01-17 23:14:08 [INFO] __main__: Validating environment...
+2026-01-17 23:14:08 [INFO] __main__: Environment: development
+2026-01-17 23:14:08 [INFO] __main__: Debug mode: True
+2026-01-17 23:14:08 [INFO] __main__: Upload folder: uploads
+2026-01-17 23:14:08 [INFO] __main__: Download folder: downloads
+2026-01-17 23:14:08 [INFO] __main__: AI features: Enabled
+2026-01-17 23:14:08 [INFO] __main__: Speaker diarization: Enabled
+2026-01-17 23:14:08 [INFO] __main__: Server running on http://0.0.0.0:5000
+2026-01-17 23:14:08 [INFO] __main__: Debug mode: True
+2026-01-17 23:14:08 [WARNING] werkzeug:  * Debugger is active!
+2026-01-17 23:14:45 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:15:45 IST)" (scheduled at 2026-01-17 23:14:45.396861+02:00)
+2026-01-17 23:14:45 [INFO] apscheduler.executors.default: Job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:15:45 IST)" executed successfully
+2026-01-17 23:14:58 [INFO] apscheduler.scheduler: Scheduler has been shut down
+2026-01-17 23:15:05 [INFO] __main__: Folder ready: uploads
+2026-01-17 23:15:05 [INFO] __main__: Folder ready: downloads
+2026-01-17 23:15:05 [INFO] __main__: Initializing TranscriptionManager...
+2026-01-17 23:15:05 [INFO] transcriber_engine: CPU Mode: Using 16 threads
+2026-01-17 23:15:05 [INFO] transcriber_engine: Loading Whisper model (medium) on cpu...
+2026-01-17 23:15:06 [INFO] httpx: HTTP Request: GET https://huggingface.co/api/models/Systran/faster-whisper-medium/revision/main "HTTP/1.1 200 OK"
+2026-01-17 23:15:09 [INFO] transcriber_engine: Loading speaker diarization pipeline...
+2026-01-17 23:15:09 [INFO] httpx: HTTP Request: HEAD https://huggingface.co/pyannote/speaker-diarization-3.1/resolve/main/config.yaml "HTTP/1.1 401 Unauthorized"
+2026-01-17 23:15:22 [INFO] httpx: HTTP Request: HEAD https://huggingface.co/pyannote/segmentation-3.0/resolve/main/pytorch_model.bin "HTTP/1.1 401 Unauthorized"
+2026-01-17 23:15:23 [INFO] httpx: HTTP Request: HEAD https://huggingface.co/pyannote/speaker-diarization-community-1/resolve/main/plda/xvec_transform.npz "HTTP/1.1 401 Unauthorized"
+2026-01-17 23:15:23 [WARNING] transcriber_engine: Diarization disabled: 401 Client Error. (Request ID: Root=1-696bfbee-36a9315d7cab71bc328ca9e1;c30316d6-8573-4600-8cd8-aa004141922b)
+
+Cannot access gated repo for url https://huggingface.co/pyannote/speaker-diarization-community-1/resolve/main/plda/xvec_transform.npz.
+Access to model pyannote/speaker-diarization-community-1 is restricted. You must have access to it and be authenticated to access it. Please log in.
+2026-01-17 23:15:23 [INFO] apscheduler.scheduler: Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-01-17 23:15:23 [INFO] transcriber_engine: Auto-shutdown enabled: 15 min timeout
+2026-01-17 23:15:23 [INFO] apscheduler.scheduler: Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-01-17 23:15:23 [INFO] apscheduler.scheduler: Added job "TranscriptionManager._cleanup_old_files" to job store "default"
+2026-01-17 23:15:23 [INFO] apscheduler.scheduler: Added job "TranscriptionManager._check_idle" to job store "default"
+2026-01-17 23:15:23 [INFO] apscheduler.scheduler: Scheduler started
+2026-01-17 23:15:23 [INFO] __main__: Google Gemini API configured
+2026-01-17 23:15:23 [INFO] __main__: ============================================================
+2026-01-17 23:15:23 [INFO] __main__: ============================================================
+2026-01-17 23:15:23 [INFO] __main__: Validating environment...
+2026-01-17 23:15:23 [INFO] __main__: Environment: development
+2026-01-17 23:15:23 [INFO] __main__: Debug mode: True
+2026-01-17 23:15:23 [INFO] __main__: Upload folder: uploads
+2026-01-17 23:15:23 [INFO] __main__: Download folder: downloads
+2026-01-17 23:15:23 [INFO] __main__: AI features: Enabled
+2026-01-17 23:15:23 [INFO] __main__: Speaker diarization: Enabled
+2026-01-17 23:15:23 [INFO] __main__: Server running on http://0.0.0.0:5000
+2026-01-17 23:15:23 [INFO] __main__: Debug mode: True
+2026-01-17 23:15:23 [WARNING] werkzeug:  * Debugger is active!
+2026-01-17 23:15:45 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:16:45 IST)" (scheduled at 2026-01-17 23:15:45.396861+02:00)
+2026-01-17 23:15:45 [INFO] apscheduler.executors.default: Job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:16:45 IST)" executed successfully
+2026-01-17 23:16:09 [INFO] faster_whisper: Processing audio with duration 02:11:46.091
+2026-01-17 23:16:23 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:17:23 IST)" (scheduled at 2026-01-17 23:16:23.819284+02:00)
+2026-01-17 23:16:23 [INFO] apscheduler.executors.default: Job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:17:23 IST)" executed successfully
+2026-01-17 23:16:45 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:17:45 IST)" (scheduled at 2026-01-17 23:16:45.396861+02:00)
+2026-01-17 23:16:45 [INFO] apscheduler.executors.default: Job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:17:45 IST)" executed successfully
+2026-01-17 23:17:23 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:18:23 IST)" (scheduled at 2026-01-17 23:17:23.819284+02:00)
+2026-01-17 23:17:23 [INFO] apscheduler.executors.default: Job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:18:23 IST)" executed successfully
+2026-01-17 23:17:45 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:18:45 IST)" (scheduled at 2026-01-17 23:17:45.396861+02:00)
+2026-01-17 23:17:45 [INFO] apscheduler.executors.default: Job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:18:45 IST)" executed successfully
+2026-01-17 23:18:06 [INFO] faster_whisper: VAD filter removed 16:24.144 of audio
+2026-01-17 23:18:23 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:19:23 IST)" (scheduled at 2026-01-17 23:18:23.819284+02:00)
+2026-01-17 23:18:23 [INFO] apscheduler.executors.default: Job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:19:23 IST)" executed successfully
+2026-01-17 23:18:45 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:19:45 IST)" (scheduled at 2026-01-17 23:18:45.396861+02:00)
+2026-01-17 23:18:45 [INFO] apscheduler.executors.default: Job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:19:45 IST)" executed successfully
+2026-01-17 23:19:23 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:20:23 IST)" (scheduled at 2026-01-17 23:19:23.819284+02:00)
+2026-01-17 23:19:23 [INFO] apscheduler.executors.default: Job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:20:23 IST)" executed successfully
+2026-01-17 23:19:45 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:20:45 IST)" (scheduled at 2026-01-17 23:19:45.396861+02:00)
+2026-01-17 23:19:45 [WARNING] transcriber_engine: INITIATING SERVER SHUTDOWN...
+2026-01-17 23:19:55 [INFO] apscheduler.executors.default: Job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:20:45 IST)" executed successfully
+2026-01-17 23:20:23 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:21:23 IST)" (scheduled at 2026-01-17 23:20:23.819284+02:00)
+2026-01-17 23:20:23 [INFO] apscheduler.executors.default: Job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:21:23 IST)" executed successfully
+2026-01-17 23:20:45 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:21:45 IST)" (scheduled at 2026-01-17 23:20:45.396861+02:00)
+2026-01-17 23:20:45 [WARNING] transcriber_engine: INITIATING SERVER SHUTDOWN...
+2026-01-17 23:20:55 [INFO] apscheduler.executors.default: Job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:21:45 IST)" executed successfully
+2026-01-17 23:21:23 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:22:23 IST)" (scheduled at 2026-01-17 23:21:23.819284+02:00)
+2026-01-17 23:21:23 [INFO] apscheduler.executors.default: Job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:22:23 IST)" executed successfully
+2026-01-17 23:21:45 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:22:45 IST)" (scheduled at 2026-01-17 23:21:45.396861+02:00)
+2026-01-17 23:21:45 [WARNING] transcriber_engine: INITIATING SERVER SHUTDOWN...
+2026-01-17 23:21:55 [INFO] apscheduler.executors.default: Job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:22:45 IST)" executed successfully
+2026-01-17 23:22:23 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:23:23 IST)" (scheduled at 2026-01-17 23:22:23.819284+02:00)
+2026-01-17 23:22:23 [INFO] apscheduler.executors.default: Job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:23:23 IST)" executed successfully
+2026-01-17 23:22:45 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:23:45 IST)" (scheduled at 2026-01-17 23:22:45.396861+02:00)
+2026-01-17 23:22:45 [WARNING] transcriber_engine: INITIATING SERVER SHUTDOWN...
+2026-01-17 23:22:55 [INFO] apscheduler.executors.default: Job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:23:45 IST)" executed successfully
+2026-01-17 23:23:23 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:24:23 IST)" (scheduled at 2026-01-17 23:23:23.819284+02:00)
+2026-01-17 23:23:23 [INFO] apscheduler.executors.default: Job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:24:23 IST)" executed successfully
+2026-01-17 23:23:45 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:24:45 IST)" (scheduled at 2026-01-17 23:23:45.396861+02:00)
+2026-01-17 23:23:45 [WARNING] transcriber_engine: INITIATING SERVER SHUTDOWN...
+2026-01-17 23:23:55 [INFO] apscheduler.executors.default: Job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:24:45 IST)" executed successfully
+2026-01-17 23:24:23 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:25:23 IST)" (scheduled at 2026-01-17 23:24:23.819284+02:00)
+2026-01-17 23:24:23 [INFO] apscheduler.executors.default: Job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:25:23 IST)" executed successfully
+2026-01-17 23:24:45 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:25:45 IST)" (scheduled at 2026-01-17 23:24:45.396861+02:00)
+2026-01-17 23:24:45 [WARNING] transcriber_engine: INITIATING SERVER SHUTDOWN...
+2026-01-17 23:24:55 [INFO] apscheduler.executors.default: Job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:25:45 IST)" executed successfully
+2026-01-17 23:25:23 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:26:23 IST)" (scheduled at 2026-01-17 23:25:23.819284+02:00)
+2026-01-17 23:25:23 [INFO] apscheduler.executors.default: Job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:26:23 IST)" executed successfully
+2026-01-17 23:25:45 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:26:45 IST)" (scheduled at 2026-01-17 23:25:45.396861+02:00)
+2026-01-17 23:25:45 [WARNING] transcriber_engine: INITIATING SERVER SHUTDOWN...
+2026-01-17 23:25:55 [INFO] apscheduler.executors.default: Job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:26:45 IST)" executed successfully
+2026-01-17 23:26:23 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:27:23 IST)" (scheduled at 2026-01-17 23:26:23.819284+02:00)
+2026-01-17 23:26:23 [INFO] apscheduler.executors.default: Job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:27:23 IST)" executed successfully
+2026-01-17 23:26:45 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:27:45 IST)" (scheduled at 2026-01-17 23:26:45.396861+02:00)
+2026-01-17 23:26:45 [WARNING] transcriber_engine: INITIATING SERVER SHUTDOWN...
+2026-01-17 23:26:55 [INFO] apscheduler.executors.default: Job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:27:45 IST)" executed successfully
+2026-01-17 23:27:23 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:28:23 IST)" (scheduled at 2026-01-17 23:27:23.819284+02:00)
+2026-01-17 23:27:23 [INFO] apscheduler.executors.default: Job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:28:23 IST)" executed successfully
+2026-01-17 23:27:45 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:28:45 IST)" (scheduled at 2026-01-17 23:27:45.396861+02:00)
+2026-01-17 23:27:45 [WARNING] transcriber_engine: INITIATING SERVER SHUTDOWN...
+2026-01-17 23:27:55 [INFO] apscheduler.executors.default: Job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:28:45 IST)" executed successfully
+2026-01-17 23:28:23 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:29:23 IST)" (scheduled at 2026-01-17 23:28:23.819284+02:00)
+2026-01-17 23:28:23 [INFO] apscheduler.executors.default: Job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:29:23 IST)" executed successfully
+2026-01-17 23:28:45 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:29:45 IST)" (scheduled at 2026-01-17 23:28:45.396861+02:00)
+2026-01-17 23:28:45 [WARNING] transcriber_engine: INITIATING SERVER SHUTDOWN...
+2026-01-17 23:28:55 [INFO] apscheduler.executors.default: Job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:29:45 IST)" executed successfully
+2026-01-17 23:29:23 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:30:23 IST)" (scheduled at 2026-01-17 23:29:23.819284+02:00)
+2026-01-17 23:29:23 [INFO] apscheduler.executors.default: Job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:30:23 IST)" executed successfully
+2026-01-17 23:29:45 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:30:45 IST)" (scheduled at 2026-01-17 23:29:45.396861+02:00)
+2026-01-17 23:29:45 [WARNING] transcriber_engine: INITIATING SERVER SHUTDOWN...
+2026-01-17 23:29:55 [INFO] apscheduler.executors.default: Job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:30:45 IST)" executed successfully
+2026-01-17 23:30:23 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:31:23 IST)" (scheduled at 2026-01-17 23:30:23.819284+02:00)
+2026-01-17 23:30:23 [INFO] apscheduler.executors.default: Job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:31:23 IST)" executed successfully
+2026-01-17 23:30:31 [INFO] apscheduler.scheduler: Scheduler has been shut down
+2026-01-17 23:30:38 [INFO] __main__: Folder ready: uploads
+2026-01-17 23:30:38 [INFO] __main__: Folder ready: downloads
+2026-01-17 23:30:38 [INFO] __main__: Initializing TranscriptionManager...
+2026-01-17 23:30:38 [WARNING] transcriber_engine: Found zombie task 309994da-fe04-41ef-a73e-ab7eda024622, marking as error
+2026-01-17 23:30:38 [INFO] transcriber_engine: CPU Mode: Using 16 threads
+2026-01-17 23:30:38 [INFO] transcriber_engine: Loading Whisper model (small) on cpu...
+2026-01-17 23:30:39 [INFO] httpx: HTTP Request: GET https://huggingface.co/api/models/Systran/faster-whisper-small/revision/main "HTTP/1.1 200 OK"
+2026-01-17 23:30:39 [INFO] httpx: HTTP Request: HEAD https://huggingface.co/Systran/faster-whisper-small/resolve/536b0662742c02347bc0e980a01041f333bce120/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-01-17 23:30:39 [INFO] httpx: HTTP Request: HEAD https://huggingface.co/Systran/faster-whisper-small/resolve/536b0662742c02347bc0e980a01041f333bce120/tokenizer.json "HTTP/1.1 307 Temporary Redirect"
+2026-01-17 23:30:39 [INFO] httpx: HTTP Request: HEAD https://huggingface.co/Systran/faster-whisper-small/resolve/536b0662742c02347bc0e980a01041f333bce120/model.bin "HTTP/1.1 302 Found"
+2026-01-17 23:30:39 [INFO] httpx: HTTP Request: HEAD https://huggingface.co/Systran/faster-whisper-small/resolve/536b0662742c02347bc0e980a01041f333bce120/vocabulary.txt "HTTP/1.1 307 Temporary Redirect"
+2026-01-17 23:30:39 [INFO] httpx: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/Systran/faster-whisper-small/536b0662742c02347bc0e980a01041f333bce120/config.json "HTTP/1.1 200 OK"
+2026-01-17 23:30:39 [INFO] httpx: HTTP Request: GET https://huggingface.co/api/models/Systran/faster-whisper-small/xet-read-token/536b0662742c02347bc0e980a01041f333bce120 "HTTP/1.1 200 OK"
+2026-01-17 23:30:39 [INFO] httpx: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/Systran/faster-whisper-small/536b0662742c02347bc0e980a01041f333bce120/tokenizer.json "HTTP/1.1 200 OK"
+2026-01-17 23:30:40 [INFO] httpx: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/Systran/faster-whisper-small/536b0662742c02347bc0e980a01041f333bce120/vocabulary.txt "HTTP/1.1 200 OK"
+2026-01-17 23:30:40 [INFO] httpx: HTTP Request: GET https://huggingface.co/api/resolve-cache/models/Systran/faster-whisper-small/536b0662742c02347bc0e980a01041f333bce120/config.json "HTTP/1.1 200 OK"
+2026-01-17 23:30:40 [INFO] httpx: HTTP Request: GET https://huggingface.co/api/resolve-cache/models/Systran/faster-whisper-small/536b0662742c02347bc0e980a01041f333bce120/tokenizer.json "HTTP/1.1 200 OK"
+2026-01-17 23:30:40 [INFO] httpx: HTTP Request: GET https://huggingface.co/api/resolve-cache/models/Systran/faster-whisper-small/536b0662742c02347bc0e980a01041f333bce120/vocabulary.txt "HTTP/1.1 200 OK"
+2026-01-17 23:30:45 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:31:45 IST)" (scheduled at 2026-01-17 23:30:45.396861+02:00)
+2026-01-17 23:30:45 [WARNING] transcriber_engine: INITIATING SERVER SHUTDOWN...
+2026-01-17 23:30:55 [INFO] apscheduler.executors.default: Job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:31:45 IST)" executed successfully
+2026-01-17 23:30:55 [INFO] transcriber_engine: Loading speaker diarization pipeline...
+2026-01-17 23:30:55 [INFO] httpx: HTTP Request: HEAD https://huggingface.co/pyannote/speaker-diarization-3.1/resolve/main/config.yaml "HTTP/1.1 401 Unauthorized"
+2026-01-17 23:30:56 [INFO] httpx: HTTP Request: HEAD https://huggingface.co/pyannote/segmentation-3.0/resolve/main/pytorch_model.bin "HTTP/1.1 401 Unauthorized"
+2026-01-17 23:30:56 [INFO] httpx: HTTP Request: HEAD https://huggingface.co/pyannote/speaker-diarization-community-1/resolve/main/plda/xvec_transform.npz "HTTP/1.1 401 Unauthorized"
+2026-01-17 23:30:56 [WARNING] transcriber_engine: Diarization disabled: 401 Client Error. (Request ID: Root=1-696bff93-448223033572f4c77437b829;f7754702-85bd-4955-bc3e-b2dbe9f527b9)
+
+Cannot access gated repo for url https://huggingface.co/pyannote/speaker-diarization-community-1/resolve/main/plda/xvec_transform.npz.
+Access to model pyannote/speaker-diarization-community-1 is restricted. You must have access to it and be authenticated to access it. Please log in.
+2026-01-17 23:30:56 [INFO] apscheduler.scheduler: Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-01-17 23:30:56 [INFO] transcriber_engine: Auto-shutdown enabled: 15 min timeout
+2026-01-17 23:30:56 [INFO] apscheduler.scheduler: Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-01-17 23:30:56 [INFO] apscheduler.scheduler: Added job "TranscriptionManager._cleanup_old_files" to job store "default"
+2026-01-17 23:30:56 [INFO] apscheduler.scheduler: Added job "TranscriptionManager._check_idle" to job store "default"
+2026-01-17 23:30:56 [INFO] apscheduler.scheduler: Scheduler started
+2026-01-17 23:30:56 [INFO] __main__: Google Gemini API configured
+2026-01-17 23:30:56 [INFO] __main__: ============================================================
+2026-01-17 23:30:56 [INFO] __main__: ============================================================
+2026-01-17 23:30:56 [INFO] __main__: Validating environment...
+2026-01-17 23:30:56 [INFO] __main__: Environment: development
+2026-01-17 23:30:56 [INFO] __main__: Debug mode: True
+2026-01-17 23:30:56 [INFO] __main__: Upload folder: uploads
+2026-01-17 23:30:56 [INFO] __main__: Download folder: downloads
+2026-01-17 23:30:56 [INFO] __main__: AI features: Enabled
+2026-01-17 23:30:56 [INFO] __main__: Speaker diarization: Enabled
+2026-01-17 23:30:56 [INFO] __main__: Server running on http://0.0.0.0:5000
+2026-01-17 23:30:56 [INFO] __main__: Debug mode: True
+2026-01-17 23:30:56 [WARNING] werkzeug:  * Debugger is active!
+2026-01-17 23:31:45 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:32:45 IST)" (scheduled at 2026-01-17 23:31:45.396861+02:00)
+2026-01-17 23:31:45 [WARNING] transcriber_engine: INITIATING SERVER SHUTDOWN...
+2026-01-17 23:31:55 [INFO] apscheduler.executors.default: Job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:32:45 IST)" executed successfully
+2026-01-17 23:31:56 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:32:56 IST)" (scheduled at 2026-01-17 23:31:56.808088+02:00)
+2026-01-17 23:31:56 [INFO] apscheduler.executors.default: Job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:32:56 IST)" executed successfully
+2026-01-17 23:32:45 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:33:45 IST)" (scheduled at 2026-01-17 23:32:45.396861+02:00)
+2026-01-17 23:32:45 [WARNING] transcriber_engine: INITIATING SERVER SHUTDOWN...
+2026-01-17 23:32:55 [INFO] apscheduler.executors.default: Job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:33:45 IST)" executed successfully
+2026-01-17 23:32:56 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:33:56 IST)" (scheduled at 2026-01-17 23:32:56.808088+02:00)
+2026-01-17 23:32:56 [INFO] apscheduler.executors.default: Job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:33:56 IST)" executed successfully
+2026-01-17 23:33:04 [INFO] apscheduler.scheduler: Scheduler has been shut down
+2026-01-17 23:33:09 [INFO] __main__: Folder ready: uploads
+2026-01-17 23:33:09 [INFO] __main__: Folder ready: downloads
+2026-01-17 23:33:09 [INFO] __main__: Initializing TranscriptionManager...
+2026-01-17 23:33:09 [INFO] transcriber_engine: CPU Mode: Using 16 threads
+2026-01-17 23:33:09 [INFO] transcriber_engine: Loading Whisper model (small) on cpu...
+2026-01-17 23:33:10 [INFO] httpx: HTTP Request: GET https://huggingface.co/api/models/Systran/faster-whisper-small/revision/main "HTTP/1.1 200 OK"
+2026-01-17 23:33:11 [INFO] transcriber_engine: Loading speaker diarization pipeline...
+2026-01-17 23:33:11 [INFO] httpx: HTTP Request: HEAD https://huggingface.co/pyannote/speaker-diarization-3.1/resolve/main/config.yaml "HTTP/1.1 401 Unauthorized"
+2026-01-17 23:33:12 [INFO] httpx: HTTP Request: HEAD https://huggingface.co/pyannote/segmentation-3.0/resolve/main/pytorch_model.bin "HTTP/1.1 401 Unauthorized"
+2026-01-17 23:33:12 [INFO] httpx: HTTP Request: HEAD https://huggingface.co/pyannote/speaker-diarization-community-1/resolve/main/plda/xvec_transform.npz "HTTP/1.1 401 Unauthorized"
+2026-01-17 23:33:12 [WARNING] transcriber_engine: Diarization disabled: 401 Client Error. (Request ID: Root=1-696c001a-6f28ee08018d49ee0845cf3a;4b97f025-3a6c-44c9-a0aa-8a96f4a7b002)
+
+Cannot access gated repo for url https://huggingface.co/pyannote/speaker-diarization-community-1/resolve/main/plda/xvec_transform.npz.
+Access to model pyannote/speaker-diarization-community-1 is restricted. You must have access to it and be authenticated to access it. Please log in.
+2026-01-17 23:33:12 [INFO] apscheduler.scheduler: Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-01-17 23:33:12 [INFO] transcriber_engine: Auto-shutdown enabled: 15 min timeout
+2026-01-17 23:33:12 [INFO] apscheduler.scheduler: Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-01-17 23:33:12 [INFO] apscheduler.scheduler: Added job "TranscriptionManager._cleanup_old_files" to job store "default"
+2026-01-17 23:33:12 [INFO] apscheduler.scheduler: Added job "TranscriptionManager._check_idle" to job store "default"
+2026-01-17 23:33:12 [INFO] apscheduler.scheduler: Scheduler started
+2026-01-17 23:33:12 [INFO] __main__: Google Gemini API configured
+2026-01-17 23:33:12 [INFO] __main__: ============================================================
+2026-01-17 23:33:12 [INFO] __main__: ============================================================
+2026-01-17 23:33:12 [INFO] __main__: Validating environment...
+2026-01-17 23:33:12 [INFO] __main__: Environment: development
+2026-01-17 23:33:12 [INFO] __main__: Debug mode: True
+2026-01-17 23:33:12 [INFO] __main__: Upload folder: uploads
+2026-01-17 23:33:12 [INFO] __main__: Download folder: downloads
+2026-01-17 23:33:12 [INFO] __main__: AI features: Enabled
+2026-01-17 23:33:12 [INFO] __main__: Speaker diarization: Enabled
+2026-01-17 23:33:12 [INFO] __main__: Server running on http://0.0.0.0:5000
+2026-01-17 23:33:12 [INFO] __main__: Debug mode: True
+2026-01-17 23:33:12 [WARNING] werkzeug:  * Debugger is active!
+2026-01-17 23:33:45 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:34:45 IST)" (scheduled at 2026-01-17 23:33:45.396861+02:00)
+2026-01-17 23:33:45 [WARNING] transcriber_engine: INITIATING SERVER SHUTDOWN...
+2026-01-17 23:33:55 [INFO] apscheduler.executors.default: Job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:34:45 IST)" executed successfully
+2026-01-17 23:34:12 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:35:12 IST)" (scheduled at 2026-01-17 23:34:12.442537+02:00)
+2026-01-17 23:34:12 [INFO] apscheduler.executors.default: Job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:35:12 IST)" executed successfully
+2026-01-17 23:34:45 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:35:45 IST)" (scheduled at 2026-01-17 23:34:45.396861+02:00)
+2026-01-17 23:34:45 [WARNING] transcriber_engine: INITIATING SERVER SHUTDOWN...
+2026-01-17 23:34:55 [INFO] apscheduler.executors.default: Job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:35:45 IST)" executed successfully
+2026-01-17 23:35:12 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:36:12 IST)" (scheduled at 2026-01-17 23:35:12.442537+02:00)
+2026-01-17 23:35:12 [INFO] apscheduler.executors.default: Job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:36:12 IST)" executed successfully
+2026-01-17 23:35:45 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:36:45 IST)" (scheduled at 2026-01-17 23:35:45.396861+02:00)
+2026-01-17 23:35:45 [WARNING] transcriber_engine: INITIATING SERVER SHUTDOWN...
+2026-01-17 23:35:55 [INFO] apscheduler.executors.default: Job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:36:45 IST)" executed successfully
+2026-01-17 23:36:11 [INFO] faster_whisper: Processing audio with duration 02:11:46.091
+2026-01-17 23:36:12 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:37:12 IST)" (scheduled at 2026-01-17 23:36:12.442537+02:00)
+2026-01-17 23:36:12 [INFO] apscheduler.executors.default: Job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:37:12 IST)" executed successfully
+2026-01-17 23:36:45 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:37:45 IST)" (scheduled at 2026-01-17 23:36:45.396861+02:00)
+2026-01-17 23:36:45 [WARNING] transcriber_engine: INITIATING SERVER SHUTDOWN...
+2026-01-17 23:36:55 [INFO] apscheduler.executors.default: Job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:37:45 IST)" executed successfully
+2026-01-17 23:37:12 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:38:12 IST)" (scheduled at 2026-01-17 23:37:12.442537+02:00)
+2026-01-17 23:37:12 [INFO] apscheduler.executors.default: Job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:38:12 IST)" executed successfully
+2026-01-17 23:37:45 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:38:45 IST)" (scheduled at 2026-01-17 23:37:45.396861+02:00)
+2026-01-17 23:37:45 [WARNING] transcriber_engine: INITIATING SERVER SHUTDOWN...
+2026-01-17 23:37:55 [INFO] apscheduler.executors.default: Job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:38:45 IST)" executed successfully
+2026-01-17 23:37:58 [INFO] faster_whisper: VAD filter removed 16:24.144 of audio
+2026-01-17 23:38:12 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:39:12 IST)" (scheduled at 2026-01-17 23:38:12.442537+02:00)
+2026-01-17 23:38:12 [INFO] apscheduler.executors.default: Job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:39:12 IST)" executed successfully
+2026-01-17 23:38:45 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:39:45 IST)" (scheduled at 2026-01-17 23:38:45.396861+02:00)
+2026-01-17 23:38:45 [WARNING] transcriber_engine: INITIATING SERVER SHUTDOWN...
+2026-01-17 23:38:55 [INFO] apscheduler.executors.default: Job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:39:45 IST)" executed successfully
+2026-01-17 23:39:12 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:40:12 IST)" (scheduled at 2026-01-17 23:39:12.442537+02:00)
+2026-01-17 23:39:12 [INFO] apscheduler.executors.default: Job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:40:12 IST)" executed successfully
+2026-01-17 23:39:45 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:40:45 IST)" (scheduled at 2026-01-17 23:39:45.396861+02:00)
+2026-01-17 23:39:45 [WARNING] transcriber_engine: INITIATING SERVER SHUTDOWN...
+2026-01-17 23:39:55 [INFO] apscheduler.executors.default: Job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:40:45 IST)" executed successfully
+2026-01-17 23:40:12 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:41:12 IST)" (scheduled at 2026-01-17 23:40:12.442537+02:00)
+2026-01-17 23:40:12 [INFO] apscheduler.executors.default: Job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:41:12 IST)" executed successfully
+2026-01-17 23:40:45 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:41:45 IST)" (scheduled at 2026-01-17 23:40:45.396861+02:00)
+2026-01-17 23:40:45 [WARNING] transcriber_engine: INITIATING SERVER SHUTDOWN...
+2026-01-17 23:40:55 [INFO] apscheduler.executors.default: Job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:41:45 IST)" executed successfully
+2026-01-17 23:41:12 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:42:12 IST)" (scheduled at 2026-01-17 23:41:12.442537+02:00)
+2026-01-17 23:41:12 [INFO] apscheduler.executors.default: Job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:42:12 IST)" executed successfully
+2026-01-17 23:41:45 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:42:45 IST)" (scheduled at 2026-01-17 23:41:45.396861+02:00)
+2026-01-17 23:41:45 [WARNING] transcriber_engine: INITIATING SERVER SHUTDOWN...
+2026-01-17 23:41:55 [INFO] apscheduler.executors.default: Job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:42:45 IST)" executed successfully
+2026-01-17 23:42:12 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:43:12 IST)" (scheduled at 2026-01-17 23:42:12.442537+02:00)
+2026-01-17 23:42:12 [INFO] apscheduler.executors.default: Job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:43:12 IST)" executed successfully
+2026-01-17 23:42:45 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:43:45 IST)" (scheduled at 2026-01-17 23:42:45.396861+02:00)
+2026-01-17 23:42:45 [WARNING] transcriber_engine: INITIATING SERVER SHUTDOWN...
+2026-01-17 23:42:55 [INFO] apscheduler.executors.default: Job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:43:45 IST)" executed successfully
+2026-01-17 23:43:12 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:44:12 IST)" (scheduled at 2026-01-17 23:43:12.442537+02:00)
+2026-01-17 23:43:12 [INFO] apscheduler.executors.default: Job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:44:12 IST)" executed successfully
+2026-01-17 23:43:45 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:44:45 IST)" (scheduled at 2026-01-17 23:43:45.396861+02:00)
+2026-01-17 23:43:45 [WARNING] transcriber_engine: INITIATING SERVER SHUTDOWN...
+2026-01-17 23:43:55 [INFO] apscheduler.executors.default: Job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:44:45 IST)" executed successfully
+2026-01-17 23:44:12 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:45:12 IST)" (scheduled at 2026-01-17 23:44:12.442537+02:00)
+2026-01-17 23:44:12 [INFO] apscheduler.executors.default: Job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-17 23:45:12 IST)" executed successfully
+2026-01-18 01:50:45 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-18 01:51:45 IST)" (scheduled at 2026-01-18 01:50:45.396861+02:00)
+2026-01-18 01:50:45 [WARNING] transcriber_engine: INITIATING SERVER SHUTDOWN...
+2026-01-18 01:50:45 [WARNING] apscheduler.executors.default: Run time of job "TranscriptionManager._cleanup_old_files (trigger: interval[1:00:00], next run at: 2026-01-18 02:05:45 IST)" was missed by 0:45:00.412112
+2026-01-18 01:50:55 [INFO] apscheduler.executors.default: Job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-18 01:51:45 IST)" executed successfully
+2026-01-18 01:51:12 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-18 01:52:12 IST)" (scheduled at 2026-01-18 01:51:12.442537+02:00)
+2026-01-18 01:51:12 [INFO] apscheduler.executors.default: Job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-18 01:52:12 IST)" executed successfully
+2026-01-18 01:51:12 [WARNING] apscheduler.executors.default: Run time of job "TranscriptionManager._cleanup_old_files (trigger: interval[1:00:00], next run at: 2026-01-18 02:33:12 IST)" was missed by 0:18:00.408083
+2026-01-18 01:51:45 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-18 01:52:45 IST)" (scheduled at 2026-01-18 01:51:45.396861+02:00)
+2026-01-18 01:51:45 [WARNING] transcriber_engine: INITIATING SERVER SHUTDOWN...
+2026-01-18 01:51:55 [INFO] apscheduler.executors.default: Job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-18 01:52:45 IST)" executed successfully
+2026-01-18 01:52:12 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-18 01:53:12 IST)" (scheduled at 2026-01-18 01:52:12.442537+02:00)
+2026-01-18 01:52:12 [INFO] apscheduler.executors.default: Job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-18 01:53:12 IST)" executed successfully
+2026-01-18 01:52:45 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-18 01:53:45 IST)" (scheduled at 2026-01-18 01:52:45.396861+02:00)
+2026-01-18 01:52:45 [WARNING] transcriber_engine: INITIATING SERVER SHUTDOWN...
+2026-01-18 01:52:55 [INFO] apscheduler.executors.default: Job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-18 01:53:45 IST)" executed successfully
+2026-01-18 01:53:12 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-18 01:54:12 IST)" (scheduled at 2026-01-18 01:53:12.442537+02:00)
+2026-01-18 01:53:12 [INFO] apscheduler.executors.default: Job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-18 01:54:12 IST)" executed successfully
+2026-01-18 01:53:45 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-18 01:54:45 IST)" (scheduled at 2026-01-18 01:53:45.396861+02:00)
+2026-01-18 01:53:45 [WARNING] transcriber_engine: INITIATING SERVER SHUTDOWN...
+2026-01-18 01:53:55 [INFO] apscheduler.executors.default: Job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-18 01:54:45 IST)" executed successfully
+2026-01-18 01:54:00 [INFO] apscheduler.scheduler: Scheduler has been shut down
+2026-01-18 01:54:45 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-18 01:55:45 IST)" (scheduled at 2026-01-18 01:54:45.396861+02:00)
+2026-01-18 01:54:45 [WARNING] transcriber_engine: INITIATING SERVER SHUTDOWN...
+2026-01-18 01:54:55 [INFO] __main__: Folder ready: uploads
+2026-01-18 01:54:55 [INFO] __main__: Folder ready: downloads
+2026-01-18 01:54:55 [INFO] __main__: Initializing TranscriptionManager...
+2026-01-18 01:54:55 [WARNING] transcriber_engine: Found zombie task bb1fbf46-dfbf-441b-927b-bd29463a8837, marking as error
+2026-01-18 01:54:55 [INFO] transcriber_engine: CPU Mode: Using 16 threads
+2026-01-18 01:54:55 [INFO] transcriber_engine: Loading Whisper model (small) on cpu...
+2026-01-18 01:54:55 [INFO] apscheduler.executors.default: Job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-18 01:55:45 IST)" executed successfully
+2026-01-18 01:54:56 [INFO] httpx: HTTP Request: GET https://huggingface.co/api/models/Systran/faster-whisper-small/revision/main "HTTP/1.1 200 OK"
+2026-01-18 01:54:58 [INFO] transcriber_engine: Loading speaker diarization pipeline...
+2026-01-18 01:54:58 [INFO] httpx: HTTP Request: HEAD https://huggingface.co/pyannote/speaker-diarization-3.1/resolve/main/config.yaml "HTTP/1.1 401 Unauthorized"
+2026-01-18 01:55:06 [INFO] httpx: HTTP Request: HEAD https://huggingface.co/pyannote/segmentation-3.0/resolve/main/pytorch_model.bin "HTTP/1.1 401 Unauthorized"
+2026-01-18 01:55:06 [INFO] httpx: HTTP Request: HEAD https://huggingface.co/pyannote/speaker-diarization-community-1/resolve/main/plda/xvec_transform.npz "HTTP/1.1 401 Unauthorized"
+2026-01-18 01:55:06 [WARNING] transcriber_engine: Diarization disabled: 401 Client Error. (Request ID: Root=1-696c215e-65023751230160605942d34c;8c08b8c9-7354-4e46-997b-665a6c2fb10f)
+
+Cannot access gated repo for url https://huggingface.co/pyannote/speaker-diarization-community-1/resolve/main/plda/xvec_transform.npz.
+Access to model pyannote/speaker-diarization-community-1 is restricted. You must have access to it and be authenticated to access it. Please log in.
+2026-01-18 01:55:06 [INFO] apscheduler.scheduler: Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-01-18 01:55:06 [INFO] transcriber_engine: Auto-shutdown enabled: 15 min timeout
+2026-01-18 01:55:06 [INFO] apscheduler.scheduler: Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-01-18 01:55:06 [INFO] apscheduler.scheduler: Added job "TranscriptionManager._cleanup_old_files" to job store "default"
+2026-01-18 01:55:06 [INFO] apscheduler.scheduler: Added job "TranscriptionManager._check_idle" to job store "default"
+2026-01-18 01:55:06 [INFO] apscheduler.scheduler: Scheduler started
+2026-01-18 01:55:06 [INFO] __main__: Google Gemini API configured
+2026-01-18 01:55:06 [INFO] __main__: ============================================================
+2026-01-18 01:55:06 [INFO] __main__: ============================================================
+2026-01-18 01:55:06 [INFO] __main__: Validating environment...
+2026-01-18 01:55:06 [INFO] __main__: Environment: development
+2026-01-18 01:55:06 [INFO] __main__: Debug mode: True
+2026-01-18 01:55:06 [INFO] __main__: Upload folder: uploads
+2026-01-18 01:55:06 [INFO] __main__: Download folder: downloads
+2026-01-18 01:55:06 [INFO] __main__: AI features: Enabled
+2026-01-18 01:55:06 [INFO] __main__: Speaker diarization: Enabled
+2026-01-18 01:55:06 [INFO] __main__: Server running on http://0.0.0.0:5000
+2026-01-18 01:55:06 [INFO] __main__: Debug mode: True
+2026-01-18 01:55:07 [WARNING] werkzeug:  * Debugger is active!
+2026-01-18 01:55:45 [INFO] apscheduler.executors.default: Running job "TranscriptionManager._check_idle (trigger: interval[0:01:00], next run at: 2026-01-18 01:56:45 IST)" (scheduled at 2026-01-18 01:55:45.396861+02:00)
+2026-01-18 01:55:45 [WARNING] transcriber_engine: INITIATING SERVER SHUTDOWN...
+2026-01-18 01:55:48 [INFO] apscheduler.scheduler: Scheduler has been shut down

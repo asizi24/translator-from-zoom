@@ -19,9 +19,9 @@ services:
       - AUTO_SHUTDOWN=${AUTO_SHUTDOWN:-false}
       - SHUTDOWN_DRY_RUN=${SHUTDOWN_DRY_RUN:-true}
       - IDLE_TIMEOUT_MINUTES=${IDLE_TIMEOUT_MINUTES:-15}
-      # Performance optimizations
-      - HF_HUB_OFFLINE=1
-      - TRANSFORMERS_OFFLINE=1
+      # Performance optimizations (enable OFFLINE after first successful run)
+      - HF_HUB_OFFLINE=0
+      - TRANSFORMERS_OFFLINE=0
       - CUDA_VISIBLE_DEVICES=
     expose:
       - "5000"
