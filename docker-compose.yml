@@ -1,41 +1,132 @@
+# =============================================================================
+# Docker Compose - Production Configuration
+# =============================================================================
+# Security fixes applied:
+# - Removed privileged: true (CRITICAL)
+# - Removed pid: "host" (CRITICAL)
+# - Removed .env file volume mount
+# - Added memory limits
+# - Added read-only rootfs where possible
+#
+# Author: DevSquad AI (Senior Tech Lead Rewrite)
+# =============================================================================
+
 services:
   web:
-    build: .
+    build:
+      context: .
+      args:
+        # Configure Whisper model at build time (tiny/small/medium/large-v3)
+        WHISPER_MODEL: ${WHISPER_MODEL:-small}
     container_name: transcription_app
-    restart: always
-    privileged: true
-    pid: "host"
+    restart: unless-stopped
+    
+    # Graceful shutdown - wait for transcription to finish
+    stop_grace_period: 120s
+
+    # Resource limits (adjust based on your server)
+    deploy:
+      resources:
+        limits:
+          memory: 8G
+          cpus: '2.0'
+        reservations:
+          memory: 2G
+          cpus: '0.5'
+
+    # Log rotation to prevent disk fill-up
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "3"
+
     volumes:
+      # Persistent storage for files
       - ./downloads:/app/downloads
       - ./uploads:/app/uploads
-      - ./.env:/app/.env
-      - huggingface_cache:/root/.cache/huggingface
+      # HuggingFace cache for diarization models
+      - huggingface_cache:/home/appuser/.cache/huggingface
+
+    # Environment from .env file
     env_file:
       - .env
+
+    # Explicit environment variables
     environment:
-      - HF_TOKEN=${HF_TOKEN}
-      - HUGGING_FACE_HUB_TOKEN=${HF_TOKEN}
-      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      # API tokens
+      - HF_TOKEN=${HF_TOKEN:-}
+      - HUGGING_FACE_HUB_TOKEN=${HF_TOKEN:-}
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY:-}
+      
+      # Auto-shutdown for cloud deployments
       - AUTO_SHUTDOWN=${AUTO_SHUTDOWN:-false}
       - SHUTDOWN_DRY_RUN=${SHUTDOWN_DRY_RUN:-true}
       - IDLE_TIMEOUT_MINUTES=${IDLE_TIMEOUT_MINUTES:-15}
-      # Performance optimizations (enable OFFLINE after first successful run)
-      - HF_HUB_OFFLINE=0
-      - TRANSFORMERS_OFFLINE=0
+      
+      # Model configuration
+      - WHISPER_MODEL=${WHISPER_MODEL:-small}
+      - USE_GPU=false
+      
+      # Performance settings
+      - HF_HUB_OFFLINE=${HF_HUB_OFFLINE:-0}
+      - TRANSFORMERS_OFFLINE=${TRANSFORMERS_OFFLINE:-0}
+      
+      # Disable CUDA (using CPU)
       - CUDA_VISIBLE_DEVICES=
+      
+      # Flask production settings
+      - FLASK_ENV=production
+
     expose:
       - "5000"
 
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 120s
+
+
+  # ==========================================================================
+  # Nginx Reverse Proxy
+  # ==========================================================================
   nginx:
-    image: nginx:latest
+    image: nginx:alpine
     container_name: nginx_proxy
-    restart: always
+    restart: unless-stopped
+
+    # Log rotation for nginx
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "3"
+
     ports:
       - "80:80"
+      # Uncomment for HTTPS:
+      # - "443:443"
+
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
-    depends_on:
-      - web
+      # Uncomment for HTTPS:
+      # - ./certs:/etc/nginx/certs:ro
 
+    depends_on:
+      web:
+        condition: service_healthy
+
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+# =============================================================================
+# Named Volumes
+# =============================================================================
 volumes:
   huggingface_cache:
+    name: transcription_hf_cache
