@@ -95,6 +95,28 @@
             scroll-behavior: smooth;
         }
 
+        /* Clickable timestamps */
+        .timestamp-link {
+            cursor: pointer;
+            color: #6366f1;
+            font-weight: 600;
+            font-family: monospace;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: rgba(99, 102, 241, 0.1);
+            transition: all 0.2s ease;
+        }
+
+        .timestamp-link:hover {
+            background: rgba(99, 102, 241, 0.2);
+            transform: scale(1.05);
+        }
+
+        .timestamp-link.active {
+            background: rgba(99, 102, 241, 0.3);
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.5);
+        }
+
         /* Tab System */
         .tab-btn {
             transition: all 0.3s ease;
@@ -340,8 +362,10 @@
         // Speaker label to display name mapping
         function formatSpeakerLabel(speaker) {
             if (speaker === 'UNKNOWN') return 'דובר לא מזוהה';
+            if (speaker === 'DIRECT_INPUT') return '📋 טקסט מודבק';
             // Convert SPEAKER_00 to "דובר א", SPEAKER_01 to "דובר ב", etc.
             const speakerNum = parseInt(speaker.replace('SPEAKER_', ''));
+            if (isNaN(speakerNum)) return `🎙️ ${speaker}`;
             const hebrewLetters = ['א', 'ב', 'ג', 'ד', 'ה', 'ו', 'ז', 'ח', 'ט', 'י'];
             return `🎙️ דובר ${hebrewLetters[speakerNum] || speakerNum}`;
         }
@@ -371,19 +395,23 @@
                         const speaker = segment.speaker || 'UNKNOWN';
                         const text = segment.text;
                         const speakerColor = stringToColor(speaker);
+                        const startTime = segment.start || 0;
+                        const endTime = segment.end || 0;
+                        // Use pre-formatted timestamp if available, otherwise format it
+                        const timestampDisplay = segment.timestamp_formatted || `[${formatTime(startTime)}]`;
 
                         const segmentDiv = document.createElement('div');
-                        segmentDiv.className = 'mb-4 p-4 rounded-lg transition-all hover:shadow-md';
+                        segmentDiv.className = 'segment-block mb-4 p-4 rounded-lg transition-all hover:shadow-md';
                         segmentDiv.style.backgroundColor = speakerColor;
                         segmentDiv.style.borderLeft = `4px solid ${stringToColor(speaker + 'dark')}`;
 
                         segmentDiv.innerHTML = `
                             <div class="flex items-center gap-2 mb-2">
+                                <span class="timestamp-link" onclick="onTimestampClick(${startTime}, this)" title="Click to highlight">
+                                    ${timestampDisplay}
+                                </span>
                                 <span class="font-semibold text-gray-800 text-sm">
                                     ${formatSpeakerLabel(speaker)}
-                                </span>
-                                <span class="text-xs text-gray-600">
-                                    ${formatTime(segment.start)} - ${formatTime(segment.end)}
                                 </span>
                             </div>
                             <div class="text-gray-900 leading-relaxed">
@@ -405,11 +433,30 @@
             }
         }
 
-        // Format time in MM:SS
+        // Format time in HH:MM:SS (precise timestamps)
         function formatTime(seconds) {
-            const mins = Math.floor(seconds / 60);
+            const hours = Math.floor(seconds / 3600);
+            const mins = Math.floor((seconds % 3600) / 60);
             const secs = Math.floor(seconds % 60);
-            return `${mins}:${secs.toString().padStart(2, '0')}`;
+            return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        // Handle timestamp click (for future audio seek integration)
+        function onTimestampClick(startSeconds, element) {
+            // Remove active state from all timestamps
+            document.querySelectorAll('.timestamp-link').forEach(el => el.classList.remove('active'));
+
+            // Add active state to clicked timestamp
+            element.classList.add('active');
+
+            // Scroll the segment into view
+            const segmentDiv = element.closest('.segment-block');
+            if (segmentDiv) {
+                segmentDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+
+            // TODO: If audio player exists, seek to startSeconds
+            console.log(`Timestamp clicked: ${formatTime(startSeconds)} (${startSeconds}s)`);
         }
 
         function askPreset(type) {

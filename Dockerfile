@@ -14,8 +14,8 @@
 # Stage 1: Builder - Install dependencies
 FROM python:3.10-slim AS builder
 
-# Build-time arguments
-ARG WHISPER_MODEL=small
+# Build-time arguments - Large-v3 for maximum accuracy on GCP
+ARG WHISPER_MODEL=large-v3
 
 # Install build dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -105,8 +105,9 @@ EXPOSE 5000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
     CMD curl -f http://localhost:5000/health || exit 1
 
-# Run with Gunicorn
-# - 1 worker (Whisper uses significant memory)
-# - 4 threads for concurrent requests  
-# - 1200s timeout for long transcriptions
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "1", "--threads", "4", "--timeout", "1200", "app:app"]
+# Run with Gunicorn optimized for GCP high-mem instance
+# - 1 worker (Large-v3 uses significant memory ~10GB)
+# - 8 threads for concurrent requests
+# - 3600s timeout (1 hour) for very long transcriptions
+# - Keep-alive for persistent connections
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "1", "--threads", "8", "--timeout", "3600", "--keep-alive", "75", "app:app"]

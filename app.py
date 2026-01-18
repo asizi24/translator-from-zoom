@@ -146,12 +146,22 @@ ensure_folders()
 logger.info("Initializing TranscriptionManager...")
 manager = TranscriptionManager()
 
-# Configure Gemini AI
+# Configure Gemini AI with Pro model for maximum capability
 gemini_model: Optional[genai.GenerativeModel] = None
+GEMINI_SAFETY_SETTINGS = [
+    {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_ONLY_HIGH"},
+    {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_ONLY_HIGH"},
+    {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_ONLY_HIGH"},
+    {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_ONLY_HIGH"},
+]
+
 if config.GOOGLE_API_KEY:
     genai.configure(api_key=config.GOOGLE_API_KEY)
-    gemini_model = genai.GenerativeModel("gemini-1.5-flash")
-    logger.info("Google Gemini API configured")
+    gemini_model = genai.GenerativeModel(
+        "gemini-1.5-pro-latest",
+        safety_settings=GEMINI_SAFETY_SETTINGS
+    )
+    logger.info("Google Gemini 1.5 Pro configured with relaxed safety settings")
 else:
     logger.warning("Google Gemini API not configured - AI features disabled")
 
@@ -495,6 +505,68 @@ def player(task_id: str) -> Tuple[str, int]:
     return render_template("player.html", task_id=task_id)
 
 
+@app.route("/create_direct", methods=["POST"])
+@rate_limit_decorator("30/minute")
+def create_direct() -> Tuple[Response, int]:
+    """
+    Create a task directly from pasted transcript text.
+    
+    This allows users who already have a transcript to skip the
+    transcription process and go directly to the AI chat player.
+    """
+    data = request.json or {}
+    text = data.get("text", "").strip()
+
+    # Validation
+    if not text:
+        return jsonify({"error": "הטקסט ריק. אנא הדבק תמלול."}), 400
+
+    if len(text) < 10:
+        return jsonify({"error": "הטקסט קצר מדי. אנא הדבק תמלול מלא."}), 400
+
+    if len(text) > 500000:  # ~500KB limit
+        return jsonify({"error": "הטקסט ארוך מדי (מקסימום 500,000 תווים)."}), 400
+
+    try:
+        # Generate task_id
+        import uuid
+        task_id = str(uuid.uuid4())[:8]
+        
+        # Create transcript file
+        filename = f"direct_{task_id}_{int(time.time())}.txt"
+        filepath = os.path.join(config.DOWNLOAD_FOLDER, filename)
+        
+        with open(filepath, "w", encoding="utf-8") as f:
+            f.write(text)
+        
+        # Create task with completed status
+        manager.tasks[task_id] = {
+            "status": "completed",
+            "progress": 100,
+            "message": "תמלול מהדבקה ישירה",
+            "filename": filepath,
+            "transcript_text": text,
+            "transcript_segments": [{"speaker": "DIRECT_INPUT", "text": text, "start": 0, "end": 0}],
+            "created_at": time.time(),
+            "source": "direct_paste"
+        }
+        
+        logger.info("Created direct paste task: %s (%d chars)", task_id, len(text))
+        
+        return jsonify({
+            "task_id": task_id,
+            "redirect_url": f"/player/{task_id}",
+            "status": "completed"
+        }), 200
+
+    except IOError as e:
+        logger.error("Failed to save direct paste: %s", e)
+        return jsonify({"error": "שגיאה בשמירת הטקסט"}), 500
+    except Exception as e:
+        logger.exception("Direct paste error")
+        return jsonify({"error": f"שגיאה: {e}"}), 500
+
+
 # =============================================================================
 # Routes - Export
 # =============================================================================
@@ -728,6 +800,15 @@ def ask() -> Tuple[Response, int]:
         return jsonify({"answer": response.text, "error": None}), 200
 
     except Exception as e:
+        error_str = str(e)
+        # Handle quota/rate limit errors specifically
+        if "429" in error_str or "Quota" in error_str or "quota" in error_str:
+            logger.error("QUOTA EXCEEDED in /ask: %s", e)
+            return jsonify({
+                "error": "מכסת ה-AI היומית הסתיימה. נסה שוב מחר.",
+                "answer": None,
+                "quota_exceeded": True
+            }), 429
         logger.error("Gemini API error: %s", e)
         return jsonify({"error": f"AI error: {e}", "answer": None}), 500
 
@@ -814,6 +895,14 @@ def generate_study_material() -> Tuple[Response, int]:
         logger.error("Validation error: %s", e)
         return jsonify({"error": str(e)}), 500
     except Exception as e:
+        error_str = str(e)
+        # Handle quota/rate limit errors specifically
+        if "429" in error_str or "Quota" in error_str or "quota" in error_str:
+            logger.error("QUOTA EXCEEDED in /generate_study_material: %s", e)
+            return jsonify({
+                "error": "מכסת ה-AI היומית הסתיימה. נסה שוב מחר.",
+                "quota_exceeded": True
+            }), 429
         logger.exception("Gemini API error")
         return jsonify({"error": f"AI error: {e}"}), 500
 

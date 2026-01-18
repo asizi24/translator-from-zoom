@@ -50,12 +50,27 @@ logger = logging.getLogger(__name__)
 # =============================================================================
 # CONFIGURATION - Environment-driven settings
 # =============================================================================
-WHISPER_MODEL: str = os.getenv("WHISPER_MODEL", "small")
+WHISPER_MODEL: str = os.getenv("WHISPER_MODEL", "large-v3")
 DEFAULT_LANGUAGE: str = os.getenv("TRANSCRIPTION_LANGUAGE", "he")
 DOWNLOAD_FOLDER: str = os.getenv("DOWNLOAD_FOLDER", "downloads")
 UPLOAD_FOLDER: str = os.getenv("UPLOAD_FOLDER", "uploads")
 TASKS_FILE: str = os.getenv("TASKS_FILE", "tasks_state.json")
 CLEANUP_HOURS: int = int(os.getenv("CLEANUP_HOURS", "24"))
+
+# =============================================================================
+# GEMINI AI CONFIGURATION - GCP Optimized
+# =============================================================================
+GEMINI_MODEL_PRIMARY: str = "gemini-1.5-pro-latest"  # Massive 1M token context
+GEMINI_MODEL_FALLBACK: str = "gemini-1.5-flash"       # Fallback on quota exceeded
+GEMINI_MAX_TEXT_CHARS: int = 30000                     # Pro can handle much more
+
+# Relaxed safety settings - don't block normal conversation transcripts
+GEMINI_SAFETY_SETTINGS = [
+    {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_ONLY_HIGH"},
+    {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_ONLY_HIGH"},
+    {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_ONLY_HIGH"},
+    {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_ONLY_HIGH"},
+]
 
 # Type aliases
 TaskDict = Dict[str, Any]
@@ -487,11 +502,14 @@ class TranscriptionManager:
 
         try:
             for seg in segments_gen:
+                # Format timestamp as [HH:MM:SS] for precise time reference
+                timestamp_formatted = self._format_timestamp(seg.start)
                 segment_data: SegmentDict = {
                     "start": seg.start,
                     "end": seg.end,
                     "text": seg.text.strip(),
-                    "speaker": "UNKNOWN"
+                    "speaker": "UNKNOWN",
+                    "timestamp_formatted": timestamp_formatted
                 }
                 segments.append(segment_data)
                 text_parts.append(seg.text)
@@ -499,8 +517,8 @@ class TranscriptionManager:
                 # Update progress every 30s of audio
                 if duration > 0 and seg.end - last_progress_time > 30:
                     progress = min(25 + int((seg.end / duration) * 55), 80)
-                    time_str = f"{int(seg.end // 60):02d}:{int(seg.end % 60):02d}"
-                    duration_str = f"{int(duration // 60):02d}:{int(duration % 60):02d}"
+                    time_str = self._format_timestamp(seg.end)
+                    duration_str = self._format_timestamp(duration)
                     self._update_task(
                         task_id, "transcribing", progress,
                         f"Transcribing... {time_str} / {duration_str}"
@@ -548,12 +566,12 @@ class TranscriptionManager:
 
     def _generate_summary(self, text: str) -> Optional[Dict[str, Any]]:
         """
-        Generate AI summary using Google Gemini.
+        Generate AI summary using Google Gemini (Pro with Flash fallback).
         
-        Enhanced for Hebrew study materials with:
-        - Hebrew language specification
-        - Key learning points extraction
-        - Actionable study notes
+        GCP Optimized Features:
+        - Uses Gemini 1.5 Pro with massive 1M token context window
+        - Auto-fallback to Flash if Pro quota exceeded
+        - Relaxed safety settings for transcript content
         """
         api_key = os.getenv("GOOGLE_API_KEY")
         if not api_key:
@@ -563,24 +581,12 @@ class TranscriptionManager:
         if len(text.strip()) < 100:
             return {"title": "תמלול קצר", "summary": "התמלול קצר מדי לסיכום.", "tags": []}
 
-        try:
-            genai.configure(api_key=api_key)
-            model = genai.GenerativeModel("gemini-1.5-flash")
-
-            # Enhanced prompt for Hebrew study materials
-            prompt = f"""אתה עוזר לימודים מומחה. נתח את התמלול הבא של שיעור והחזר JSON תקין בלבד.
-
-החזר **רק** את ה-JSON הבא, ללא טקסט נוסף:
-{{
-    "title": "כותרת קצרה וברורה של השיעור (עד 10 מילים)",
-    "summary": "סיכום תמציתי ב-2-3 משפטים של הנושאים המרכזיים",
-    "key_points": [
-        "נקודה מרכזית 1",
-        "נקודה מרכזית 2", 
-        "נקודה מרכזית 3"
-    ],
-    "tags": ["תגית1", "תגית2", "תגית3"]
-}}
+        genai.configure(api_key=api_key)
+        
+        # Powerhouse Prompt - Professor Level analysis
+        text_to_analyze = text[:GEMINI_MAX_TEXT_CHARS]
+        prompt = f"""אתה עוזר לימודים מומחה (Professor Level). נתח את התמלול הבא של שיעור.
+החזר JSON בלבד עם השדות: title, summary (סיכום מעמיק), key_points (נקודות מפתח), tags.
 
 כללים:
 - הכל בעברית
@@ -589,52 +595,101 @@ class TranscriptionManager:
 - אם התמלול לא ברור, סכם את מה שניתן להבין
 
 תמלול השיעור:
-{text[:8000]}"""
+{text_to_analyze}"""
 
+        try:
+            # 1. Try the Beast: Gemini 1.5 Pro
+            logger.info("Attempting summary with Gemini 1.5 Pro...")
+            model = genai.GenerativeModel(
+                GEMINI_MODEL_PRIMARY,
+                safety_settings=GEMINI_SAFETY_SETTINGS
+            )
             response = model.generate_content(
                 prompt,
-                generation_config={"temperature": 0.3}  # Lower for more consistent JSON
+                generation_config={"temperature": 0.3}
             )
-            raw_text = response.text.strip()
+            result = self._parse_json_response(response.text)
+            result["model_used"] = GEMINI_MODEL_PRIMARY
+            logger.info("Summary generated using %s", GEMINI_MODEL_PRIMARY)
+            return result
 
-            # Clean markdown code blocks
-            if raw_text.startswith("```"):
-                raw_text = raw_text.split("```")[1]
-                if raw_text.startswith("json"):
-                    raw_text = raw_text[4:]
-                raw_text = raw_text.strip()
+        except Exception as e:
+            error_msg = str(e)
+            # Check for Quota/Resource Exhausted
+            if "429" in error_msg or "ResourceExhausted" in error_msg or "Quota" in error_msg:
+                logger.warning("⚠️ Quota exceeded for Pro model. Falling back to Flash...")
+                try:
+                    # 2. Fallback to the Workhorse: Gemini 1.5 Flash
+                    model = genai.GenerativeModel(
+                        GEMINI_MODEL_FALLBACK,
+                        safety_settings=GEMINI_SAFETY_SETTINGS
+                    )
+                    response = model.generate_content(
+                        prompt,
+                        generation_config={"temperature": 0.3}
+                    )
+                    result = self._parse_json_response(response.text)
+                    result["model_used"] = GEMINI_MODEL_FALLBACK
+                    logger.info("Summary generated using fallback %s", GEMINI_MODEL_FALLBACK)
+                    return result
+                except Exception as flash_error:
+                    logger.error("Flash fallback failed: %s", flash_error)
+                    return self._error_summary(str(flash_error))
+            else:
+                logger.error("AI Summary failed: %s", e)
+                return self._error_summary(str(e))
 
-            result = json.loads(raw_text)
+    def _parse_json_response(self, raw_text: str) -> Dict[str, Any]:
+        """Helper to clean and parse JSON from AI response."""
+        try:
+            clean_text = raw_text.strip()
+            # Remove markdown code blocks if present
+            if clean_text.startswith("```"):
+                clean_text = clean_text.split("```")[1]
+                if clean_text.startswith("json"):
+                    clean_text = clean_text[4:]
+                clean_text = clean_text.strip()
             
+            result = json.loads(clean_text)
             # Ensure required fields exist
             result.setdefault("title", "שיעור")
             result.setdefault("summary", "")
+            result.setdefault("key_points", [])
             result.setdefault("tags", [])
-            
             return result
-
         except json.JSONDecodeError as e:
-            logger.warning("Could not parse AI summary as JSON: %s", e)
-            # Return fallback summary
-            return {
-                "title": "סיכום לא זמין",
-                "summary": "לא הצלחנו ליצור סיכום אוטומטי. צפה בתמלול המלא.",
-                "tags": [],
-                "error": "JSON parse failed"
-            }
-        except Exception as e:
-            logger.warning("Summary generation failed: %s", e)
-            # Return user-friendly fallback instead of None
-            return {
-                "title": "סיכום לא זמין",
-                "summary": f"שגיאה ביצירת סיכום: {str(e)[:50]}",
-                "tags": [],
-                "error": str(e)
-            }
+            logger.warning("Could not parse AI response as JSON: %s", e)
+            return self._error_summary("JSON Parse Error")
+
+    def _error_summary(self, error: str) -> Dict[str, Any]:
+        """Return a standardized error summary dict."""
+        return {
+            "title": "שגיאה בסיכום",
+            "summary": f"לא ניתן היה לייצר סיכום עקב תקלה: {error[:100]}",
+            "key_points": [],
+            "tags": ["error"],
+            "error": error
+        }
 
     # =========================================================================
     # Helpers
     # =========================================================================
+
+    @staticmethod
+    def _format_timestamp(seconds: float) -> str:
+        """
+        Format seconds as [HH:MM:SS] for precise time reference.
+        
+        Args:
+            seconds: Time in seconds
+            
+        Returns:
+            Formatted string like "[00:05:23]"
+        """
+        hours = int(seconds // 3600)
+        minutes = int((seconds % 3600) // 60)
+        secs = int(seconds % 60)
+        return f"[{hours:02d}:{minutes:02d}:{secs:02d}]"
 
     def _get_audio_duration(self, audio_path: str) -> float:
         """Get audio duration in seconds."""
@@ -725,14 +780,25 @@ class TranscriptionManager:
         segments: List[SegmentDict],
         text: str
     ) -> None:
-        """Save transcription results to files."""
+        """
+        Save transcription results to files with precise timestamps.
+        
+        Output formats:
+        - .txt: Plain text with [HH:MM:SS] timestamps per segment
+        - _segments.json: Full segment data with speaker/timing info
+        """
         base = os.path.splitext(audio_path)[0]
 
-        # Plain text transcript
+        # Plain text transcript with timestamps
         with open(f"{base}.txt", "w", encoding="utf-8") as f:
-            f.write(text)
+            for seg in segments:
+                timestamp = seg.get("timestamp_formatted", self._format_timestamp(seg.get("start", 0)))
+                speaker = seg.get("speaker", "UNKNOWN")
+                text_line = seg.get("text", "").strip()
+                if text_line:
+                    f.write(f"{timestamp} {speaker}: {text_line}\n")
 
-        # Segments with timing/speaker info
+        # Segments with timing/speaker info (JSON for programmatic access)
         with open(f"{base}_segments.json", "w", encoding="utf-8") as f:
             json.dump({"segments": segments}, f, ensure_ascii=False, indent=2)
 
