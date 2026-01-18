@@ -18,19 +18,32 @@ async function pasteFromClipboard() {
 function switchTab(tab) {
     const urlTab = document.getElementById('url-tab');
     const uploadTab = document.getElementById('upload-tab');
+    const pasteTab = document.getElementById('paste-tab');
     const urlContent = document.getElementById('url-content');
     const uploadContent = document.getElementById('upload-content');
+    const pasteContent = document.getElementById('paste-content');
 
+    // Reset all tabs
+    const inactiveClass = 'flex-1 py-3 px-4 text-center font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 transition';
+    const activeClass = 'flex-1 py-3 px-4 text-center font-medium border-b-2 border-purple-600 text-purple-600 transition';
+
+    urlTab.className = inactiveClass;
+    uploadTab.className = inactiveClass;
+    pasteTab.className = inactiveClass;
+    urlContent.classList.add('hidden');
+    uploadContent.classList.add('hidden');
+    pasteContent.classList.add('hidden');
+
+    // Activate selected tab
     if (tab === 'url') {
-        urlTab.className = 'flex-1 py-3 px-4 text-center font-medium border-b-2 border-purple-600 text-purple-600 transition';
-        uploadTab.className = 'flex-1 py-3 px-4 text-center font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 transition';
+        urlTab.className = activeClass;
         urlContent.classList.remove('hidden');
-        uploadContent.classList.add('hidden');
-    } else {
-        uploadTab.className = 'flex-1 py-3 px-4 text-center font-medium border-b-2 border-purple-600 text-purple-600 transition';
-        urlTab.className = 'flex-1 py-3 px-4 text-center font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 transition';
+    } else if (tab === 'upload') {
+        uploadTab.className = activeClass;
         uploadContent.classList.remove('hidden');
-        urlContent.classList.add('hidden');
+    } else if (tab === 'paste') {
+        pasteTab.className = activeClass;
+        pasteContent.classList.remove('hidden');
     }
 }
 
@@ -469,4 +482,99 @@ function toggleHistory() {
             <span>הצג היסטוריה ▼</span>
         `;
     }
+}
+
+// ===== PASTE TEXT FUNCTIONALITY =====
+
+function clearPasteText() {
+    document.getElementById('paste-text').value = '';
+    // Also clear file input if any
+    const fileInput = document.getElementById('transcript-file-input');
+    if (fileInput) {
+        fileInput.value = '';
+        document.getElementById('transcript-file-name').textContent = 'לחץ לבחירת קובץ';
+    }
+}
+
+function handleTranscriptFile(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.name.toLowerCase().endsWith('.txt')) {
+        showError('אנא העלה קובץ TXT בלבד');
+        return;
+    }
+
+    // Validate file size (max 1MB)
+    if (file.size > 1024 * 1024) {
+        showError('הקובץ גדול מדי (מקסימום 1MB)');
+        return;
+    }
+
+    // Update file name display
+    document.getElementById('transcript-file-name').textContent = `✅ ${file.name}`;
+
+    // Read file content
+    const reader = new FileReader();
+    reader.onload = function (e) {
+        const content = e.target.result;
+        document.getElementById('paste-text').value = content;
+        document.getElementById('error-msg').classList.add('hidden');
+    };
+    reader.onerror = function () {
+        showError('שגיאה בקריאת הקובץ');
+    };
+    reader.readAsText(file, 'UTF-8');
+}
+
+function submitPastedText() {
+    const pasteText = document.getElementById('paste-text').value.trim();
+    const errorMsg = document.getElementById('error-msg');
+    const submitBtn = document.getElementById('paste-submit-btn');
+
+    // Validation
+    if (!pasteText) {
+        showError('אנא הדבק טקסט תמלול');
+        return;
+    }
+
+    if (pasteText.length < 10) {
+        showError('הטקסט קצר מדי. אנא הדבק תמלול מלא.');
+        return;
+    }
+
+    // Reset UI
+    errorMsg.classList.add('hidden');
+    submitBtn.disabled = true;
+    submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+    submitBtn.innerHTML = 'יוצר...';
+
+    // API Call
+    fetch('/create_direct', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text: pasteText }),
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                showError(data.error);
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                submitBtn.innerHTML = '🚀 המשך לצ\'אט AI';
+            } else {
+                // Success - redirect to player
+                window.location.href = data.redirect_url;
+            }
+        })
+        .catch(error => {
+            showError('שגיאה בתקשורת עם השרת');
+            console.error('Error:', error);
+            submitBtn.disabled = false;
+            submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            submitBtn.innerHTML = '🚀 המשך לצ\'אט AI';
+        });
 }

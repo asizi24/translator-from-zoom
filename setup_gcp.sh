@@ -18,17 +18,12 @@ sudo apt-get install -y \
     git \
     ffmpeg
 
-# 2. Install Docker & Docker Compose
+# 2. Install Docker & Docker Compose (Official Script)
 if ! command -v docker &> /dev/null; then
     echo "🐳 Installing Docker..."
-    sudo mkdir -p /etc/apt/keyrings
-    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-    echo \
-      "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
-      $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-    
-    sudo apt-get update
-    sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+    curl -fsSL https://get.docker.com -o get-docker.sh
+    sh get-docker.sh
+    rm get-docker.sh
     
     # Enable non-root docker usage
     sudo usermod -aG docker $USER
