@@ -1,139 +1,177 @@
+"""
+Serverless Audio Study App - FastAPI Backend
+Handles audio upload to GCS, Gemini analysis, and returns Hebrew summary + quiz.
+"""
 import os
 import json
+import shutil
 import logging
 import uuid
-import time
-from fastapi import FastAPI, UploadFile, File, HTTPException, Request
+from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
+from fastapi.responses import FileResponse
+from fastapi.middleware.cors import CORSMiddleware
 from google.cloud import storage
 import vertexai
 from vertexai.generative_models import GenerativeModel, Part
 
-# הגדרות
+# Configuration
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 PROJECT_ID = os.environ.get("GOOGLE_CLOUD_PROJECT")
-# שים לב: השם הזה חייב להיות זהה לשם שיוגדר ב-setup.sh
-BUCKET_NAME = os.environ.get("BUCKET_NAME", "zoom-audio-hybrid-store") 
-LOCATION = "us-central1"
+BUCKET_NAME = os.environ.get("BUCKET_NAME", "zoom-audio-hybrid-store")
+LOCATION = os.environ.get("GCP_LOCATION", "us-central1")
 
-app = FastAPI()
+# Initialize FastAPI
+app = FastAPI(title="Audio Study Assistant", version="2.0.0")
 
-# חיבור לממשק הישן (Static & Templates)
-if os.path.exists("static"):
-    app.mount("/static", StaticFiles(directory="static"), name="static")
-if os.path.exists("templates"):
-    templates = Jinja2Templates(directory="templates")
-else:
-    templates = None
+# CORS - Allow all origins for Chrome Extension and local frontend
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-# אתחול גוגל
+# Initialize GCP clients
+storage_client = None
 try:
     if PROJECT_ID:
         vertexai.init(project=PROJECT_ID, location=LOCATION)
+        logger.info(f"Vertex AI initialized: project={PROJECT_ID}, location={LOCATION}")
     storage_client = storage.Client()
+    logger.info("GCS client initialized")
 except Exception as e:
-    logger.error(f"Failed to init GCP: {e}")
+    logger.error(f"Failed to initialize GCP clients: {e}")
 
-# --- דפים (Frontend Routes) ---
 
 @app.get("/")
-async def index(request: Request):
-    """דף הבית (העלאת קובץ)"""
-    if templates:
-        return templates.TemplateResponse("index.html", {"request": request})
-    return "Error: Templates not found. Please run locally with correct folder structure."
+async def serve_frontend():
+    """Serve the main frontend HTML"""
+    return FileResponse("static/index.html")
 
-@app.get("/player/{task_id}")
-async def player(request: Request, task_id: str):
-    """דף הנגן/צ'אט"""
-    if templates:
-        return templates.TemplateResponse("player.html", {"request": request, "task_id": task_id})
-    return "Error: Templates not found"
-
-# --- API (Backend Logic) ---
 
 @app.post("/analyze")
 async def analyze_audio(file: UploadFile = File(...)):
     """
-    1. מעלה אודיו לדלי (Bucket)
-    2. שולח לג'ימיני (Vertex AI)
-    3. שומר את ה-JSON בדלי
+    Main endpoint: Upload audio, analyze with Gemini, return summary and quiz.
+    
+    Flow:
+    1. Stream upload to GCS (memory-safe for large files)
+    2. Send to Gemini 1.5 Pro for analysis
+    3. Delete audio from GCS (cost savings)
+    4. Return JSON response
     """
+    if not PROJECT_ID:
+        raise HTTPException(status_code=500, detail="GOOGLE_CLOUD_PROJECT environment variable not set")
+    
+    if not storage_client:
+        raise HTTPException(status_code=500, detail="GCS client not initialized")
+    
     task_id = str(uuid.uuid4())
+    audio_filename = f"uploads/{task_id}_{file.filename}"
+    gcs_uri = f"gs://{BUCKET_NAME}/{audio_filename}"
     
     try:
-        if not PROJECT_ID:
-            raise HTTPException(status_code=500, detail="GCP Project ID not configured")
-
-        # א. העלאת אודיו
-        audio_filename = f"uploads/{task_id}_{file.filename}"
+        # Step 1: Stream upload to GCS (memory-safe)
         bucket = storage_client.bucket(BUCKET_NAME)
-        audio_blob = bucket.blob(audio_filename)
-        audio_blob.upload_from_file(file.file, content_type=file.content_type)
-        gcs_uri = f"gs://{BUCKET_NAME}/{audio_filename}"
-        logger.info(f"Uploaded audio to {gcs_uri}")
+        blob = bucket.blob(audio_filename)
         
-        # ב. שליחה לג'ימיני (פרומפט מותאם לממשק הישן)
+        logger.info(f"Streaming upload to {gcs_uri}")
+        
+        # Use streaming write to avoid loading entire file into RAM
+        with blob.open("wb") as gcs_file:
+            shutil.copyfileobj(file.file, gcs_file, length=1024 * 1024)  # 1MB chunks
+        
+        logger.info(f"Upload complete: {gcs_uri}")
+        
+        # Step 2: Analyze with Gemini
+        logger.info("Sending to Gemini 1.5 Pro...")
         model = GenerativeModel("gemini-1.5-pro")
-        audio_part = Part.from_uri(uri=gcs_uri, mime_type=file.content_type or "audio/mpeg")
+        
+        # Determine MIME type
+        content_type = file.content_type or "audio/mpeg"
+        audio_part = Part.from_uri(uri=gcs_uri, mime_type=content_type)
         
         prompt = """
-        נתח את ההקלטה הזו כמורה פרטי. המטרה היא לייצר סיכום לימודי.
-        החזר JSON בלבד (ללא markdown) במבנה הבא:
+אתה מורה פרטי מומחה. נתח את ההקלטה הזו וצור חומר לימודי בעברית.
+
+החזר JSON בלבד (ללא markdown, ללא ```json) במבנה המדויק הבא:
+{
+    "summary": "סיכום מקיף של התוכן ב-3-4 פסקאות. כלול את הנושאים העיקריים והמסקנות.",
+    "quiz": [
         {
-            "transcript_text": "תקציר מפורט וכרונולוגי של תוכן השיעור (כיוון שאין תמלול מלא)",
-            "summary": "סיכום קצר של 3 פסקאות",
-            "key_points": ["נקודה 1", "נקודה 2", "נקודה 3"],
-            "quiz": [
-                {
-                    "question": "שאלה?",
-                    "options": ["א", "ב", "ג", "ד"],
-                    "correct_index": 0,
-                    "explanation": "הסבר"
-                }
-            ]
+            "question": "שאלה על החומר?",
+            "options": ["תשובה א", "תשובה ב", "תשובה ג", "תשובה ד"],
+            "correct_answer": "תשובה א",
+            "explanation": "הסבר קצר למה זו התשובה הנכונה"
         }
-        """
+    ]
+}
+
+חוקים:
+1. הסיכום חייב להיות בעברית ומקיף
+2. צור בדיוק 10 שאלות בחידון
+3. כל שאלה חייבת 4 אפשרויות בדיוק
+4. correct_answer חייב להיות זהה לאחת האפשרויות
+5. החזר JSON תקין בלבד, ללא טקסט נוסף
+"""
         
-        logger.info("Sending to Gemini...")
-        response = model.generate_content([audio_part, prompt], generation_config={"response_mime_type": "application/json"})
-        result_json = response.text
-
-        # ג. שמירת התוצאה בדלי
-        result_filename = f"results/{task_id}.json"
-        result_blob = bucket.blob(result_filename)
-        result_blob.upload_from_string(result_json, content_type="application/json")
-        logger.info(f"Saved result to {result_filename}")
-
-        # הפניה לנגן
-        return {"task_id": task_id, "status": "completed", "redirect_url": f"/player/{task_id}"}
-
+        response = model.generate_content(
+            [audio_part, prompt],
+            generation_config={"response_mime_type": "application/json"}
+        )
+        
+        result_text = response.text
+        logger.info("Gemini response received")
+        
+        # Parse JSON to validate format
+        try:
+            result_json = json.loads(result_text)
+        except json.JSONDecodeError as e:
+            logger.error(f"Invalid JSON from Gemini: {e}")
+            # Return raw response if JSON parsing fails
+            result_json = {"summary": result_text, "quiz": [], "raw_response": result_text}
+        
+        # Step 3: Cleanup - Delete audio file from GCS to save costs
+        try:
+            blob.delete()
+            logger.info(f"Deleted {gcs_uri} from GCS")
+        except Exception as e:
+            logger.warning(f"Failed to delete {gcs_uri}: {e}")
+        
+        # Step 4: Return response
+        return result_json
+        
     except Exception as e:
-        logger.error(f"Error: {e}")
+        logger.error(f"Error processing audio: {e}")
+        
+        # Attempt cleanup on error
+        try:
+            bucket = storage_client.bucket(BUCKET_NAME)
+            blob = bucket.blob(audio_filename)
+            if blob.exists():
+                blob.delete()
+                logger.info(f"Cleaned up {gcs_uri} after error")
+        except Exception:
+            pass
+        
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/status/{task_id}")
-async def get_status(task_id: str):
-    """הנגן מושך מפה את הנתונים"""
-    try:
-        bucket = storage_client.bucket(BUCKET_NAME)
-        blob = bucket.blob(f"results/{task_id}.json")
-        
-        if not blob.exists():
-            return {"status": "processing"}
-            
-        json_data = blob.download_as_text()
-        data = json.loads(json_data)
-        
-        return {
-            "status": "completed",
-            "transcript_text": data.get("transcript_text", ""),
-            "summary": data.get("summary", ""),
-            "key_points": data.get("key_points", []),
-            "quiz": data.get("quiz", [])
-        }
-    except Exception as e:
-        return {"status": "error", "error": str(e)}
+
+@app.get("/health")
+async def health_check():
+    """Health check endpoint for Cloud Run"""
+    return {
+        "status": "healthy",
+        "project_id": PROJECT_ID,
+        "bucket": BUCKET_NAME,
+        "gcs_connected": storage_client is not None
+    }
+
+
+# Mount static files AFTER defining routes
+if os.path.exists("static"):
+    app.mount("/static", StaticFiles(directory="static"), name="static")
