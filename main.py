@@ -159,62 +159,68 @@ async def analyze_url(request: UrlRequest):
     if not url:
         raise HTTPException(status_code=400, detail="URL is required")
     
-    task_id = str(uuid.uuid4())
+    task_id = str(uuid.uuid4())[:8]  # Short ID for safe filenames
     
-    with tempfile.TemporaryDirectory() as temp_dir:
-        video_path = os.path.join(temp_dir, f"{task_id}_video")
-        audio_path = os.path.join(temp_dir, f"{task_id}.mp3")
+    # Use system temp to avoid Hebrew path issues on Windows
+    safe_temp = os.environ.get("TEMP", "/tmp")
+    audio_filename = f"audio_{task_id}.mp3"
+    audio_path = os.path.join(safe_temp, audio_filename)
+    
+    try:
+        # Step 1: Download and extract audio directly with yt-dlp
+        # Using -x (extract audio) + --audio-format mp3 to skip ffmpeg step
+        logger.info(f"Downloading audio from: {url}")
+        download_cmd = [
+            "yt-dlp",
+            "-x",  # Extract audio
+            "--audio-format", "mp3",
+            "--audio-quality", "4",
+            "-o", audio_path.replace(".mp3", ".%(ext)s"),  # yt-dlp will add extension
+            "--no-playlist",
+            "--no-warnings",
+            "--quiet",
+            url
+        ]
         
+        result = subprocess.run(download_cmd, capture_output=True, text=True, timeout=600)
+        
+        if result.returncode != 0:
+            error_msg = result.stderr or "Unknown download error"
+            logger.error(f"yt-dlp error: {error_msg}")
+            raise HTTPException(status_code=400, detail=f"הורדה נכשלה: {error_msg[:200]}")
+        
+        # Find the downloaded mp3 file
+        if not os.path.exists(audio_path):
+            # yt-dlp might have created it with different name
+            possible_files = [f for f in os.listdir(safe_temp) if f.startswith(f"audio_{task_id}") and f.endswith(".mp3")]
+            if possible_files:
+                audio_path = os.path.join(safe_temp, possible_files[0])
+            else:
+                raise HTTPException(status_code=500, detail="הורדה נכשלה - קובץ לא נמצא")
+        
+        logger.info(f"Audio downloaded: {audio_path}")
+        
+        # Step 2: Upload to GCS and analyze
+        result = upload_to_gcs_and_analyze(audio_path, audio_filename)
+        
+        # Cleanup local file
         try:
-            # Step 1: Download video with yt-dlp
-            logger.info(f"Downloading video from: {url}")
-            download_cmd = [
-                "yt-dlp",
-                "-f", "bestaudio/best",
-                "-o", video_path,
-                "--no-playlist",
-                url
-            ]
-            result = subprocess.run(download_cmd, capture_output=True, text=True, timeout=600)
-            
-            if result.returncode != 0:
-                logger.error(f"yt-dlp error: {result.stderr}")
-                raise HTTPException(status_code=400, detail=f"Failed to download video: {result.stderr}")
-            
-            # Find the downloaded file (yt-dlp adds extension)
-            downloaded_files = [f for f in os.listdir(temp_dir) if f.startswith(task_id) and not f.endswith('.mp3')]
-            if not downloaded_files:
-                raise HTTPException(status_code=500, detail="Download failed - no file found")
-            
-            actual_video_path = os.path.join(temp_dir, downloaded_files[0])
-            logger.info(f"Downloaded: {actual_video_path}")
-            
-            # Step 2: Extract audio with ffmpeg
-            logger.info("Extracting audio with ffmpeg...")
-            ffmpeg_cmd = [
-                "ffmpeg",
-                "-i", actual_video_path,
-                "-vn",
-                "-acodec", "libmp3lame",
-                "-q:a", "4",
-                "-y",
-                audio_path
-            ]
-            result = subprocess.run(ffmpeg_cmd, capture_output=True, text=True, timeout=300)
-            
-            if result.returncode != 0 or not os.path.exists(audio_path):
-                logger.error(f"ffmpeg error: {result.stderr}")
-                raise HTTPException(status_code=500, detail="Failed to extract audio")
-            
-            logger.info(f"Audio extracted: {audio_path}")
-            
-            # Step 3: Upload to GCS and analyze
-            return upload_to_gcs_and_analyze(audio_path, f"{task_id}.mp3")
-            
-        except subprocess.TimeoutExpired:
-            raise HTTPException(status_code=408, detail="Download/conversion timeout")
-        except HTTPException:
-            raise
-        except Exception as e:
-            logger.error(f"Error processing URL: {e}")
-            raise HTTPException(status_code=500, detail=str(e))
+            os.remove(audio_path)
+        except:
+            pass
+        
+        return result
+        
+    except subprocess.TimeoutExpired:
+        raise HTTPException(status_code=408, detail="זמן ההורדה פג - נסה קובץ קטן יותר")
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error processing URL: {e}")
+        # Cleanup on error
+        try:
+            if os.path.exists(audio_path):
+                os.remove(audio_path)
+        except:
+            pass
+        raise HTTPException(status_code=500, detail=str(e))
