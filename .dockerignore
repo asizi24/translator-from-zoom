@@ -32,7 +32,9 @@ demo_*.py
 
 # Documentation
 README.md
-*.txt
+# *.txt
+# But we need requirements.txt!
+!requirements.txt
 
 # Gemini artifacts
 .gemini/

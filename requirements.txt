@@ -1,25 +1,6 @@
-flask
-flask-cors
-werkzeug
-yt-dlp
-faster-whisper>=1.0.3
-google-generativeai
-gunicorn
-python-dotenv
-apscheduler
-python-docx
-fpdf2
-# הגרסה הזו של av עובדת מצוין עם faster-whisper החדש
-av>=12.0.0
-# ספריות לזיהוי דוברים
-pyannote.audio
-torch
-torchaudio
-
-# ==========================================
-# 🎮 GPU Support (NVIDIA) - Optional
-# ==========================================
-# For 12x faster transcription, install PyTorch with CUDA:
-# pip install torch --index-url https://download.pytorch.org/whl/cu118
-# Then set USE_GPU=true when running
-
+fastapi==0.109.2
+uvicorn==0.27.1
+python-multipart==0.0.9
+google-cloud-storage==2.14.0
+google-cloud-aiplatform==1.42.1
+jinja2==3.1.3

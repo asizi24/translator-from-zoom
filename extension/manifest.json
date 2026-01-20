@@ -1,0 +1,39 @@
+{
+    "manifest_version": 3,
+    "name": "Audio Study Assistant",
+    "version": "2.0.0",
+    "description": "Send Zoom recordings to AI for summary and quiz generation",
+    "permissions": [
+        "activeTab",
+        "scripting",
+        "storage"
+    ],
+    "host_permissions": [
+        "*://*.zoom.us/*",
+        "*://*.cloudfunctions.net/*",
+        "*://*.run.app/*"
+    ],
+    "action": {
+        "default_popup": "popup.html",
+        "default_icon": {
+            "16": "icon16.png",
+            "48": "icon48.png",
+            "128": "icon128.png"
+        }
+    },
+    "icons": {
+        "16": "icon16.png",
+        "48": "icon48.png",
+        "128": "icon128.png"
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "*://*.zoom.us/*"
+            ],
+            "js": [
+                "content.js"
+            ]
+        }
+    ]
+}
