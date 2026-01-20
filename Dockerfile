@@ -1,23 +1,20 @@
+# Use slim python image
 FROM python:3.10-slim
 
+# Set working directory
 WORKDIR /app
 
-# Install dependencies
+# Copy requirements
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy application code & static files
+# Copy code
 COPY . .
 
 # Environment variables
 ENV PYTHONUNBUFFERED=1
 
-# Run with Gunicorn + Uvicorn worker
-# CRITICAL: --timeout 3600 prevents Cloud Run from killing long Gemini requests
-CMD exec gunicorn main:app \
-    -k uvicorn.workers.UvicornWorker \
-    --bind 0.0.0.0:${PORT:-8080} \
-    --timeout 3600 \
-    --workers 1 \
-    --access-logfile - \
-    --error-logfile -
+# FIX: Use Gunicorn with Uvicorn workers AND long timeout
+# Cloud Run sets $PORT env var automatically
+# --timeout 3600 gives Gemini 1 hour to process (plenty)
+CMD exec gunicorn --bind :$PORT --workers 1 --threads 8 --timeout 3600 -k uvicorn.workers.UvicornWorker main:app
