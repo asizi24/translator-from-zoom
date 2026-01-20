@@ -58,10 +58,63 @@
 
         p.subtitle {
             color: var(--text-sub);
-            margin-bottom: 40px;
+            margin-bottom: 30px;
             font-size: 1.1rem;
         }
 
+        /* Tabs */
+        .tabs {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .tab-btn {
+            padding: 12px 30px;
+            border: 2px solid #E5E7EB;
+            background: white;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.3s;
+            color: var(--text-sub);
+        }
+
+        .tab-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border-color: transparent;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Upload Area */
         .upload-area {
             border: 3px dashed #CBD5E1;
             border-radius: 16px;
@@ -69,8 +122,6 @@
             cursor: pointer;
             transition: all 0.3s ease;
             background: rgba(255, 255, 255, 0.5);
-            position: relative;
-            overflow: hidden;
         }
 
         .upload-area:hover,
@@ -104,7 +155,37 @@
             gap: 10px;
         }
 
-        button {
+        /* URL Input */
+        .url-input-container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .url-input {
+            width: 100%;
+            padding: 18px 24px;
+            border: 2px solid #E5E7EB;
+            border-radius: 16px;
+            font-size: 1.1rem;
+            text-align: right;
+            transition: all 0.3s;
+            box-sizing: border-box;
+        }
+
+        .url-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+        }
+
+        .url-hint {
+            color: var(--text-sub);
+            font-size: 0.9rem;
+            margin-top: 12px;
+        }
+
+        /* Button */
+        button.action-btn {
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             color: white;
             border: none;
@@ -118,19 +199,19 @@
             box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4);
         }
 
-        button:hover {
+        button.action-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 8px 25px rgba(79, 70, 229, 0.5);
         }
 
-        button:disabled {
+        button.action-btn:disabled {
             background: #9CA3AF;
             cursor: not-allowed;
             transform: none;
             box-shadow: none;
         }
 
-        /* Loading Spinner */
+        /* Loading */
         .loader {
             display: none;
             margin: 40px auto;
@@ -174,7 +255,17 @@
             }
         }
 
-        /* Results Section */
+        #error-msg {
+            color: var(--error);
+            display: none;
+            margin-top: 20px;
+            font-weight: bold;
+            padding: 15px;
+            background: #FEE2E2;
+            border-radius: 12px;
+        }
+
+        /* Results */
         #results {
             display: none;
             margin-top: 50px;
@@ -203,7 +294,6 @@
             margin-bottom: 30px;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
             line-height: 1.8;
-            color: var(--text-main);
         }
 
         .summary-title {
@@ -219,8 +309,8 @@
             padding: 24px;
             border-radius: 12px;
             margin-bottom: 20px;
-            transition: transform 0.2s;
             border: 1px solid #E5E7EB;
+            transition: transform 0.2s;
         }
 
         .quiz-item:hover {
@@ -232,15 +322,11 @@
             font-weight: 700;
             margin-bottom: 15px;
             font-size: 1.1rem;
-            color: var(--text-main);
-        }
-
-        .options-grid {
-            display: grid;
-            gap: 10px;
         }
 
         .option-btn {
+            display: block;
+            width: 100%;
             background: #F9FAFB;
             border: 1px solid #D1D5DB;
             color: var(--text-main);
@@ -248,16 +334,14 @@
             border-radius: 8px;
             font-size: 1rem;
             text-align: right;
-            margin-top: 5px;
-            box-shadow: none;
-            font-weight: 400;
-            width: 100%;
+            margin-top: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
         }
 
-        .option-btn:hover {
+        .option-btn:hover:not(:disabled) {
             background: #EEF2FF;
             border-color: var(--primary);
-            transform: none;
         }
 
         .correct {
@@ -281,6 +365,21 @@
             font-size: 0.95rem;
             display: none;
         }
+
+        .reset-btn {
+            background: #6B7280;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: 30px;
+        }
+
+        .reset-btn:hover {
+            background: #4B5563;
+        }
     </style>
 </head>
 
@@ -288,51 +387,64 @@
 
     <div class="container">
         <h1>עוזר לימודי חכם</h1>
-        <p class="subtitle">העלה הקלטה והבינה המלאכותית תסכם ותכין לך מבחן באופן מיידי 🚀</p>
+        <p class="subtitle">העלה הקלטה או הדבק קישור - קבל סיכום ומבחן מיידי 🚀</p>
 
-        <!-- Upload Section -->
-        <div class="upload-area" id="drop-zone">
-            <div class="icon-cloud">☁️</div>
-            <h3>גרור קובץ לכאן או לחץ לבחירה</h3>
-            <p style="color: #9CA3AF; margin-top: 10px;">MP3, M4A, WAV (עד 200MB)</p>
-            <input type="file" id="file-input" hidden accept="audio/*">
-
-            <div class="file-info" id="file-info">
-                <span>📎</span>
-                <span id="filename">שם הקובץ</span>
-            </div>
+        <!-- Tabs -->
+        <div class="tabs" id="tabs-container">
+            <button class="tab-btn active" onclick="switchTab('file')">📁 העלאת קובץ</button>
+            <button class="tab-btn" onclick="switchTab('url')">🔗 קישור לסרטון</button>
         </div>
 
-        <!-- Actions -->
-        <button id="analyze-btn" disabled>נתח הקלטה ✨</button>
+        <!-- File Upload Tab -->
+        <div class="tab-content active" id="file-tab">
+            <div class="upload-area" id="drop-zone">
+                <div class="icon-cloud">☁️</div>
+                <h3>גרור קובץ לכאן או לחץ לבחירה</h3>
+                <p style="color: #9CA3AF; margin-top: 10px;">MP3, M4A, WAV (עד 200MB)</p>
+                <input type="file" id="file-input" hidden accept="audio/*">
+                <div class="file-info" id="file-info">
+                    <span>📎</span>
+                    <span id="filename">שם הקובץ</span>
+                </div>
+            </div>
+            <button class="action-btn" id="analyze-file-btn" disabled>נתח הקלטה ✨</button>
+        </div>
 
-        <!-- Loading State -->
+        <!-- URL Tab -->
+        <div class="tab-content" id="url-tab">
+            <div class="url-input-container">
+                <input type="text" class="url-input" id="url-input"
+                    placeholder="הדבק קישור לסרטון (YouTube, Zoom, וכו')">
+                <p class="url-hint">💡 תומך ב-YouTube, Zoom, Vimeo ועוד מאות אתרים</p>
+            </div>
+            <button class="action-btn" id="analyze-url-btn">נתח מקישור 🎬</button>
+        </div>
+
+        <!-- Loading -->
         <div class="loader" id="loader"></div>
-        <div class="status-text" id="status-text">מעלה ומעבד את ההקלטה... זה עשוי לקחת דקה...</div>
-        <div id="error-msg" style="color: var(--error); display: none; margin-top: 20px; font-weight: bold;"></div>
+        <div class="status-text" id="status-text">מוריד ומעבד... זה עשוי לקחת כמה דקות...</div>
+        <div id="error-msg"></div>
 
         <!-- Results -->
         <div id="results">
-            <!-- Summary -->
             <div class="summary-box">
-                <h2 class="summary-title">📝 סיכום ההרצאה</h2>
-                <div id="summary-content">
-                    <!-- Summary text will go here -->
-                </div>
+                <h2 class="summary-title">📝 סיכום</h2>
+                <div id="summary-content"></div>
             </div>
 
-            <!-- Quiz -->
             <h2 class="summary-title" style="margin-top: 40px;">🧠 בחן את עצמך</h2>
-            <div id="quiz-container">
-                <!-- Quiz questions will act here -->
-            </div>
+            <div id="quiz-container"></div>
+
+            <button class="reset-btn" onclick="resetUI()">התחל מחדש ↩️</button>
         </div>
     </div>
 
     <script>
         const dropZone = document.getElementById('drop-zone');
         const fileInput = document.getElementById('file-input');
-        const analyzeBtn = document.getElementById('analyze-btn');
+        const analyzeFileBtn = document.getElementById('analyze-file-btn');
+        const analyzeUrlBtn = document.getElementById('analyze-url-btn');
+        const urlInput = document.getElementById('url-input');
         const fileInfo = document.getElementById('file-info');
         const filenameSpan = document.getElementById('filename');
         const loader = document.getElementById('loader');
@@ -341,8 +453,23 @@
         const resultsDiv = document.getElementById('results');
         const summaryContent = document.getElementById('summary-content');
         const quizContainer = document.getElementById('quiz-container');
+        const tabsContainer = document.getElementById('tabs-container');
 
         let selectedFile = null;
+
+        // Tab switching
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+            if (tab === 'file') {
+                document.querySelector('.tab-btn:first-child').classList.add('active');
+                document.getElementById('file-tab').classList.add('active');
+            } else {
+                document.querySelector('.tab-btn:last-child').classList.add('active');
+                document.getElementById('url-tab').classList.add('active');
+            }
+        }
 
         // Drag & Drop
         dropZone.addEventListener('dragover', (e) => {
@@ -357,146 +484,165 @@
         dropZone.addEventListener('drop', (e) => {
             e.preventDefault();
             dropZone.classList.remove('drag-over');
-            if (e.dataTransfer.files.length) {
-                handleFile(e.dataTransfer.files[0]);
-            }
+            if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
         });
 
-        dropZone.addEventListener('click', () => {
-            fileInput.click();
-        });
-
+        dropZone.addEventListener('click', () => fileInput.click());
         fileInput.addEventListener('change', (e) => {
-            if (e.target.files.length) {
-                handleFile(e.target.files[0]);
-            }
+            if (e.target.files.length) handleFile(e.target.files[0]);
         });
 
         function handleFile(file) {
             selectedFile = file;
             filenameSpan.textContent = file.name;
             fileInfo.style.display = 'flex';
-            analyzeBtn.disabled = false;
-            errorMsg.style.display = 'none';
+            analyzeFileBtn.disabled = false;
+            hideError();
+        }
+
+        function showLoading(message) {
+            tabsContainer.style.display = 'none';
+            document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
+            loader.style.display = 'block';
+            statusText.style.display = 'block';
+            statusText.textContent = message;
+            hideError();
             resultsDiv.style.display = 'none';
         }
 
-        analyzeBtn.addEventListener('click', async () => {
-            if (!selectedFile) return;
+        function hideLoading() {
+            loader.style.display = 'none';
+            statusText.style.display = 'none';
+        }
 
-            // UI Reset
-            analyzeBtn.style.display = 'none';
-            dropZone.style.display = 'none';
-            loader.style.display = 'block';
-            statusText.style.display = 'block';
+        function showError(msg) {
+            errorMsg.textContent = msg;
+            errorMsg.style.display = 'block';
+            tabsContainer.style.display = 'flex';
+            document.getElementById('file-tab').style.display = 'block';
+        }
+
+        function hideError() {
             errorMsg.style.display = 'none';
+        }
+
+        function resetUI() {
+            resultsDiv.style.display = 'none';
+            tabsContainer.style.display = 'flex';
+            document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
+            document.getElementById('file-tab').style.display = 'block';
+            document.getElementById('file-tab').classList.add('active');
+            document.getElementById('url-tab').classList.remove('active');
+            document.querySelector('.tab-btn:first-child').classList.add('active');
+            document.querySelector('.tab-btn:last-child').classList.remove('active');
+            selectedFile = null;
+            fileInfo.style.display = 'none';
+            analyzeFileBtn.disabled = true;
+            urlInput.value = '';
+            hideError();
+        }
+
+        // Analyze File
+        analyzeFileBtn.addEventListener('click', async () => {
+            if (!selectedFile) return;
+            showLoading('מעלה ומנתח את ההקלטה...');
 
             const formData = new FormData();
             formData.append('file', selectedFile);
 
             try {
-                const response = await fetch('/analyze', {
-                    method: 'POST',
-                    body: formData
-                });
-
+                const response = await fetch('/analyze', { method: 'POST', body: formData });
                 if (!response.ok) {
                     const err = await response.json();
                     throw new Error(err.detail || 'שגיאה בשרת');
                 }
-
                 const data = await response.json();
-
-                // Expected data.result is a JSON string from Gemini
-                let parsedResult;
-                try {
-                    // If it's already an object (FastAPI auto-parsed it if Gemini returned JSON mimetype)
-                    // usually response.text would be a string if the endpoint returns {"result": text}
-                    // The provided main.py returns {"result": response.text}
-                    // response.text from Gemini might be a string containing JSON.
-
-                    // First, check if result is string or object
-                    const rawString = data.result;
-                    // Remove markdown code fences if present
-                    const cleanString = rawString.replace(/```json/g, '').replace(/```/g, '').trim();
-                    parsedResult = JSON.parse(cleanString);
-                } catch (e) {
-                    console.error("Failed to parse JSON", e);
-                    // Fallback if structured data fails
-                    parsedResult = {
-                        summary: typeof data.result === 'string' ? data.result : JSON.stringify(data.result),
-                        quiz: []
-                    };
-                }
-
-                displayResults(parsedResult);
-
+                displayResults(data.result);
             } catch (err) {
-                console.error(err);
-                errorMsg.textContent = `שגיאה: ${err.message}`;
-                errorMsg.style.display = 'block';
-                analyzeBtn.style.display = 'inline-block'; // Allow retry
-                analyzeBtn.textContent = 'נסה שוב';
-                dropZone.style.display = 'block';
-            } finally {
-                loader.style.display = 'none';
-                statusText.style.display = 'none';
+                hideLoading();
+                showError(`שגיאה: ${err.message}`);
             }
         });
 
-        function displayResults(data) {
+        // Analyze URL
+        analyzeUrlBtn.addEventListener('click', async () => {
+            const url = urlInput.value.trim();
+            if (!url) {
+                showError('אנא הכנס קישור');
+                return;
+            }
+            showLoading('מוריד סרטון וממיר לאודיו... זה עשוי לקחת כמה דקות...');
+
+            try {
+                const response = await fetch('/analyze-url', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url })
+                });
+                if (!response.ok) {
+                    const err = await response.json();
+                    throw new Error(err.detail || 'שגיאה בשרת');
+                }
+                const data = await response.json();
+                displayResults(data.result);
+            } catch (err) {
+                hideLoading();
+                showError(`שגיאה: ${err.message}`);
+            }
+        });
+
+        function displayResults(resultStr) {
+            hideLoading();
             resultsDiv.style.display = 'block';
 
-            // Summary
-            summaryContent.innerHTML = `<p>${data.summary}</p>`;
+            let data;
+            try {
+                const cleanStr = resultStr.replace(/```json/g, '').replace(/```/g, '').trim();
+                data = JSON.parse(cleanStr);
+            } catch (e) {
+                data = { summary: resultStr, quiz: [] };
+            }
 
-            // Quiz
+            summaryContent.innerHTML = `<p>${data.summary || resultStr}</p>`;
             quizContainer.innerHTML = '';
+
             if (data.quiz && data.quiz.length > 0) {
                 data.quiz.forEach((q, index) => {
                     const qEl = document.createElement('div');
                     qEl.className = 'quiz-item';
 
                     let optionsHtml = '';
-                    q.options.forEach(opt => {
-                        optionsHtml += `<button class="option-btn" onclick="checkAnswer(this, '${opt}', '${q.correct_answer}')">${opt}</button>`;
+                    (q.options || []).forEach(opt => {
+                        optionsHtml += `<button class="option-btn" onclick="checkAnswer(this, '${opt.replace(/'/g, "\\'")}', '${(q.correct_answer || '').replace(/'/g, "\\'")}')">${opt}</button>`;
                     });
 
                     qEl.innerHTML = `
                     <div class="question">${index + 1}. ${q.question}</div>
-                    <div class="options-grid">
-                        ${optionsHtml}
-                    </div>
-                    <div class="explanation">💡 ${q.explanation}</div>
+                    <div class="options-grid">${optionsHtml}</div>
+                    <div class="explanation">💡 ${q.explanation || ''}</div>
                 `;
                     quizContainer.appendChild(qEl);
                 });
             }
         }
 
-        // Expose to window for inline onclick
         window.checkAnswer = function (btn, selected, correct) {
             const parent = btn.parentElement;
             const allBtns = parent.querySelectorAll('.option-btn');
             const explanation = parent.nextElementSibling;
 
-            // Disable all buttons
             allBtns.forEach(b => b.disabled = true);
 
             if (selected === correct) {
                 btn.classList.add('correct');
             } else {
                 btn.classList.add('incorrect');
-                // Highlight correct one
                 allBtns.forEach(b => {
                     if (b.innerText === correct) b.classList.add('correct');
                 });
             }
-
-            // Show explanation
             explanation.style.display = 'block';
         }
-
     </script>
 
 </body>
