@@ -1,10 +1,11 @@
 #!/bin/bash
 
 # --- הגדרות ---
-PROJECT_ID="your-project-id"   # <-- שנה ל-ID האמיתי שלך
-BUCKET_NAME="zoom-hybrid-store-unique123" # <-- שנה לשם ייחודי
+# Configuration
+PROJECT_ID="gen-lang-client-0633910627"
+BUCKET_NAME="zoom-audio-asaf-v1"
+SERVICE_NAME="audio-study-app"
 REGION="us-central1"
-SERVICE_NAME="zoom-hybrid-app"
 
 echo "🚀 Starting Deployment..."
 
