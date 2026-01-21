@@ -1,3 +1,23 @@
+# Zoom Transcription App
+
+## 🚀 גרסאות להורדה
+
+פרויקט זה זמין בשתי תצורות, בהתאם לחומרה שברשותך:
+
+### ☁️ גרסת הענן (מומלצת למחשבים סטנדרטיים)
+
+* **נמצאת כאן (`main` branch).**
+* **דרישות:** חיבור לאינטרנט, מפתח Google Cloud.
+* **יתרונות:** עובדת מהר על כל מחשב, אין צורך בכרטיס מסך.
+
+### 💻 גרסת ה-Pro הלוקאלית (לבעלי מחשבים חזקים)
+
+* **עברו לבראנץ': `local-monolith`** (או [לחצו כאן להורדה](https://github.com/Start-Up-Nation-Cto/zoom-to-text/archive/refs/heads/local-monolith.zip)).
+* **דרישות:** כרטיס מסך NVIDIA (מומלץ), 16GB RAM.
+* **יתרונות:** פרטיות מלאה, עובד ללא אינטרנט, ללא עלויות ענן.
+
+---
+
 # 🎙️ Flask Transcription App
 
 אפליקציית תמלול אוטומטית להקלטות Zoom ווידאו. מתמלל באמצעות **Whisper AI (Large-v3)**, מזהה דוברים עם **Pyannote**, ומייצר סיכומים עם **Google Gemini**.
@@ -34,8 +54,8 @@ pip install torch --index-url https://download.pytorch.org/whl/cu118
 
 ### דרישות מקדימות
 
-- [Docker](https://docs.docker.com/get-docker/) מותקן
-- [Docker Compose](https://docs.docker.com/compose/install/) מותקן
+* [Docker](https://docs.docker.com/get-docker/) מותקן
+* [Docker Compose](https://docs.docker.com/compose/install/) מותקן
 
 ### שלב 1: הורדת הפרויקט
 
@@ -56,8 +76,8 @@ HF_TOKEN=your_huggingface_token_here
 
 **קבלת מפתחות:**
 
-- Google API Key: [Google AI Studio](https://aistudio.google.com/app/apikey)
-- HuggingFace Token (לזיהוי דוברים): [HuggingFace Settings](https://huggingface.co/settings/tokens)
+* Google API Key: [Google AI Studio](https://aistudio.google.com/app/apikey)
+* HuggingFace Token (לזיהוי דוברים): [HuggingFace Settings](https://huggingface.co/settings/tokens)
 
 ### שלב 3: הרצה
 
@@ -89,8 +109,8 @@ docker-compose build --no-cache && docker-compose up -d
 
 ### דרישות
 
-- Python 3.10+
-- FFmpeg
+* Python 3.10+
+* FFmpeg
 
 ### התקנת FFmpeg
 
@@ -147,9 +167,9 @@ python app.py
 
 ### מפרט מומלץ
 
-- **Instance Type:** `m7i-flex.large` או יותר (2 vCPUs, 8GB RAM)
-- **Storage:** 30GB gp3
-- **OS:** Ubuntu 22.04 LTS
+* **Instance Type:** `m7i-flex.large` או יותר (2 vCPUs, 8GB RAM)
+* **Storage:** 30GB gp3
+* **OS:** Ubuntu 22.04 LTS
 
 ### התקנה
 
