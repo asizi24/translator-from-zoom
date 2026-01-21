@@ -13,6 +13,9 @@ import vertexai
 from vertexai.generative_models import GenerativeModel, Part
 from dotenv import load_dotenv
 
+# Optimization: increasing chunk size to 5MB for better stability
+storage.blob._DEFAULT_CHUNKSIZE = 5 * 1024 * 1024
+
 # Load env variables locally
 load_dotenv()
 
@@ -93,7 +96,7 @@ def upload_to_gcs_and_analyze(audio_path: str, filename: str) -> dict:
     blob = bucket.blob(filename)
     
     logger.info(f"Uploading {filename} to GCS")
-    blob.upload_from_filename(audio_path)
+    blob.upload_from_filename(audio_path, timeout=600)
     gs_uri = f"gs://{BUCKET_NAME}/{filename}"
     logger.info(f"Upload complete: {gs_uri}")
     
@@ -139,7 +142,7 @@ def analyze_audio(file: UploadFile = File(...)):
     blob = bucket.blob(file.filename)
     
     logger.info(f"Starting upload for {file.filename}")
-    blob.upload_from_file(file.file)
+    blob.upload_from_file(file.file, timeout=600)
     gs_uri = f"gs://{BUCKET_NAME}/{file.filename}"
     logger.info(f"Upload complete: {gs_uri}")
     
