@@ -1,25 +1,23 @@
-# Use slim python image
 FROM python:3.10-slim
 
-# Set working directory
 WORKDIR /app
 
-# Install ffmpeg for audio extraction
-RUN apt-get update && apt-get install -y --no-install-recommends \
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
     ffmpeg \
+    libsndfile1 \
+    git \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements
+# Install Python dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy code
+# Copy application code
 COPY . .
 
 # Environment variables
 ENV PYTHONUNBUFFERED=1
 
-# FIX: Use Gunicorn with Uvicorn workers AND long timeout
-# Cloud Run sets $PORT env var automatically
-# --timeout 3600 gives Gemini 1 hour to process (plenty)
-CMD exec gunicorn --bind :$PORT --workers 1 --threads 8 --timeout 3600 -k uvicorn.workers.UvicornWorker main:app
+# Run Flask app
+CMD ["python", "app.py"]
