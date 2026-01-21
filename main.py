@@ -11,20 +11,44 @@ from pydantic import BaseModel
 from google.cloud import storage
 import vertexai
 from vertexai.generative_models import GenerativeModel, Part
+from dotenv import load_dotenv
+
+# Load env variables locally
+load_dotenv()
 
 # Configuration
-logging.basicConfig(level=logging.INFO)
+# Configuration
+from logging.handlers import RotatingFileHandler
+
+# Configure logging
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+# Create handlers
+c_handler = logging.StreamHandler()
+f_handler = RotatingFileHandler('app.log', maxBytes=10*1024*1024, backupCount=5, encoding='utf-8')
+
+# Create formatters and add it to handlers
+c_format = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+f_format = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+c_handler.setFormatter(c_format)
+f_handler.setFormatter(f_format)
+
+# Add handlers to the logger
+if not logger.handlers:
+    logger.addHandler(c_handler)
+    logger.addHandler(f_handler)
 
 PROJECT_ID = os.getenv("PROJECT_ID")
 BUCKET_NAME = os.getenv("BUCKET_NAME")
+# Trigger reload for key.json
 LOCATION = os.getenv("LOCATION", "us-central1")
 
 # Initialize Vertex AI
 try:
     if PROJECT_ID:
         vertexai.init(project=PROJECT_ID, location=LOCATION)
-        model = GenerativeModel("gemini-1.5-pro-preview-0409")
+        model = GenerativeModel("gemini-1.5-flash-001")
         logger.info(f"Vertex AI initialized: project={PROJECT_ID}")
     else:
         logger.warning("PROJECT_ID not set. Vertex AI not initialized.")
@@ -105,7 +129,7 @@ def upload_to_gcs_and_analyze(audio_path: str, filename: str) -> dict:
 
 
 @app.post("/analyze")
-async def analyze_audio(file: UploadFile = File(...)):
+def analyze_audio(file: UploadFile = File(...)):
     """Analyze uploaded audio file."""
     if not BUCKET_NAME or not model:
         raise HTTPException(status_code=500, detail="Service not configured")

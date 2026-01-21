@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    container_name: zoom-audio-app
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/key.json
+    env_file:
+      - .env
+    volumes:
+      - ./key.json:/app/key.json
+      - ./static:/app/static
+      - ./uploads:/app/uploads
+    restart: unless-stopped
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --timeout-keep-alive 600
