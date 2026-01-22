@@ -51,7 +51,7 @@ LOCATION = os.getenv("LOCATION", "us-central1")
 try:
     if PROJECT_ID:
         vertexai.init(project=PROJECT_ID, location=LOCATION)
-        model = GenerativeModel("gemini-2.0-flash")
+        model = GenerativeModel("gemini-1.5-flash")
         logger.info(f"Vertex AI initialized: project={PROJECT_ID}")
     else:
         logger.warning("PROJECT_ID not set. Vertex AI not initialized.")

@@ -171,7 +171,7 @@ async def analyze_audio(request: AnalyzeRequest):
         mime_type = get_mime_type(filename)
         
         # Initialize the model
-        model = GenerativeModel("gemini-1.5-pro")
+        model = GenerativeModel("gemini-2.0-flash")
         
         # Create audio part from GCS URI
         audio_part = Part.from_uri(request.gs_uri, mime_type=mime_type)

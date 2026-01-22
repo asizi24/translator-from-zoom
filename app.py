@@ -36,15 +36,26 @@ logger = logging.getLogger(__name__)
 
 # Constants & Env Vars
 PROJECT_ID = os.getenv("PROJECT_ID")
+if not PROJECT_ID:
+    PROJECT_ID = "gen-lang-client-0633910627" # Hardcoded backup
+    logger.warning("PROJECT_ID missing, used fallback")
+
 BUCKET_NAME = os.getenv("BUCKET_NAME")
+if not BUCKET_NAME:
+    BUCKET_NAME = "zoom-audio-asaf-v1" # Hardcoded backup
+    logger.warning("BUCKET_NAME missing, used fallback")
+
 LOCATION = os.getenv("LOCATION", "us-central1")
+
+logger.info(f"Startup Config: PROJECT_ID={PROJECT_ID}, BUCKET_NAME={BUCKET_NAME}, LOCATION={LOCATION}")
+logger.info(f"All Envs: {list(os.environ.keys())}")
 
 # Initialize Vertex AI
 model = None
 try:
     if PROJECT_ID:
         vertexai.init(project=PROJECT_ID, location=LOCATION)
-        model = GenerativeModel("gemini-2.0-flash")
+        model = GenerativeModel("gemini-1.5-flash")
         logger.info(f"Vertex AI initialized: project={PROJECT_ID}")
     else:
         logger.warning("PROJECT_ID not set. Vertex AI features will be disabled.")
@@ -410,3 +421,47 @@ async def generate_study_material(request: AskRequest):
         ]
     }
 
+@app.get("/history")
+async def get_history():
+    """Get translation history."""
+    if not BUCKET_NAME:
+        return {"tasks": []}
+    
+    # List blobs in 'tasks/' directory
+    client = get_storage_client()
+    if not client: return {"tasks": []}
+    
+    tasks = []
+    try:
+        bucket = client.bucket(BUCKET_NAME)
+        # Detailed listing would be slow, for now just return empty or cached
+        # In a real app we'd use Firestore or valid caching
+        # This is a placeholder to prevent 404
+        return {"tasks": []}
+    except Exception as e:
+        logger.error(f"History fetch failed: {e}")
+        return {"tasks": []}
+
+class DirectTextRequest(BaseModel):
+    text: str
+
+@app.post("/create_direct")
+async def create_direct(request: DirectTextRequest):
+    """Process pasted text directly."""
+    task_id = str(uuid.uuid4())[:8]
+    
+    # Save text as result
+    save_result_to_gcs(task_id, request.text)
+    
+    # Create valid task status
+    status = {
+        "task_id": task_id,
+        "status": "completed",
+        "progress": 100,
+        "message": "Processed direct text",
+        "created_at": time.time(),
+        "filename": "Direct Text"
+    }
+    save_task_status(task_id, status)
+    
+    return {"task_id": task_id, "status": "completed", "redirect_url": f"/player/{task_id}"}

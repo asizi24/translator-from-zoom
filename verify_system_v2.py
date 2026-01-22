@@ -96,7 +96,7 @@ def check_model_access():
         print(f"Initializing Vertex AI ({project_id})...")
         vertexai.init(project=project_id, location=location)
         
-        model_name = "gemini-2.0-flash"
+        model_name = "gemini-1.5-flash"
         print(f"Testing model: {model_name}...")
         model = GenerativeModel(model_name)
         # Dry run generation
