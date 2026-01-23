@@ -35,13 +35,29 @@ try:
             
     # 3. Verify Response Data
     print("3️⃣  Verifying response data...")
-    segments = status.get('transcript_segments')
-    if segments and len(segments) > 0 and 'speaker' in segments[0]:
-        print(f"   ✅ Speaker Diarization found: {len(segments)} segments")
-        print(f"   Sample: {segments[0]['speaker']} - {segments[0]['text']}")
-    else:
-        print("   ❌ No speaker segments found!")
+    # Check for core fields
+    required_fields = ['transcript_segments', 'summary', 'quiz']
+    missing_fields = [field for field in required_fields if field not in status]
+    
+    if missing_fields:
+        print(f"   ❌ Missing required JSON fields: {missing_fields}")
+        print(f"   Full status keys: {status.keys()}")
         exit(1)
+        
+    segments = status.get('transcript_segments')
+    if isinstance(segments, list) and len(segments) > 0:
+        print(f"   ✅ Speaker Diarization found: {len(segments)} segments")
+        sample = segments[0]
+        print(f"   Sample: [{sample.get('timestamp')}] {sample.get('speaker')}: {sample.get('text')[:50]}...")
+    else:
+        print("   ❌ Transcript segments missing or empty!")
+        exit(1)
+
+    if status.get('summary'):
+        print("   ✅ Summary generated")
+    
+    if status.get('quiz'):
+        print(f"   ✅ Quiz generated ({len(status['quiz'])} questions)")
 
     # 4. Open Browser for UI Check
     print("4️⃣  Opening browser for UI verification...")

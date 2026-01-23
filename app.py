@@ -55,6 +55,8 @@ model = None
 try:
     if PROJECT_ID:
         vertexai.init(project=PROJECT_ID, location=LOCATION)
+        # Initialize with system instruction for consistency if needed, 
+        # but here we will just ensure JSON mode in generation
         model = GenerativeModel("gemini-1.5-flash")
         logger.info(f"Vertex AI initialized: project={PROJECT_ID}")
     else:
@@ -204,27 +206,52 @@ def process_audio_task(task_id: str, audio_blob_name: str, prompt_override: str 
         audio_part = Part.from_uri(uri=gs_uri, mime_type="audio/mpeg")
         
         default_prompt = """
-        תמלל את קובץ השמע הזה לעברית בצורה מלאה ומדויקת.
-        הפרד בין הדוברים (למשל: דובר 1, דובר 2).
-        הוסף חותמות זמן (timestamps) לפני כל פסקה.
-        
-        בסוף התמלול, הוסף ניתוח קצר בפורמט JSON:
+        You are an expert transcriber and summarizer.
+        Analyze the audio content and return a strict JSON object with the following structure:
         {
-          "summary": "סיכום קצר של השיחה",
-          "topics": ["נושא 1", "נושא 2"],
-          "sentiment": "חיובי/שלילי/ניטרלי"
+            "transcript_segments": [
+                {"speaker": "Speaker 1", "text": "...", "timestamp": "00:00"}
+            ],
+            "summary": "A concise summary of the content (in Hebrew).",
+            "topics": ["Topic 1", "Topic 2"],
+            "quiz": [
+                {
+                    "question": "Question text",
+                    "options": ["Opt1", "Opt2", "Opt3", "Opt4"],
+                    "correct_index": 0,
+                    "explanation": "Why it is correct"
+                }
+            ],
+            "sentiment": "positive/neutral/negative"
         }
+        
+        IMPORTANT: 
+        1. The language of the content is likely Hebrew. Ensure the transcript and summary are in Hebrew.
+        2. Timestamps should be in MM:SS format.
+        3. Do not include markdown code fence blocks (```json ... ```). Just return the raw JSON.
         """
         
         prompt = prompt_override or default_prompt
         
         status["progress"] = 50
-        status["message"] = "Generating transcript..."
+        status["message"] = "Generating transcript & analysis..."
         save_task_status(task_id, status)
 
-        response = model.generate_content([audio_part, prompt])
+        # Force JSON response
+        response = model.generate_content(
+            [audio_part, prompt],
+            generation_config={"response_mime_type": "application/json"}
+        )
         result_text = response.text
         
+        # Validate JSON
+        try:
+            result_json = json.loads(result_text)
+        except json.JSONDecodeError:
+            # Fallback cleanup if needed, but response_mime_type usually prevents this
+            logger.warning("Gemini returned invalid JSON, attempting raw text save")
+            result_json = {"raw_text": result_text, "error": "Failed to parse structure"}
+
         # 3. Save Results
         save_result_to_gcs(task_id, result_text)
         
@@ -238,7 +265,9 @@ def process_audio_task(task_id: str, audio_blob_name: str, prompt_override: str 
         status["status"] = "completed"
         status["progress"] = 100
         status["message"] = "Processing complete"
-        status["transcript_text"] = result_text # Simplified for now
+        # Merge the analysis results into the status so the UI can read them directly
+        status.update(result_json)
+        
         save_task_status(task_id, status)
         logger.info(f"Task {task_id} completed successfully")
 
