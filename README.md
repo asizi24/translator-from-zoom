@@ -18,9 +18,9 @@
 
 ---
 
-# 🎙️ Flask Transcription App
+# 🎙️ Zoom Transcription App (FastAPI)
 
-אפליקציית תמלול אוטומטית להקלטות Zoom ווידאו. מתמלל באמצעות **Whisper AI (Large-v3)**, מזהה דוברים עם **Pyannote**, ומייצר סיכומים עם **Google Gemini**.
+אפליקציית תמלול אוטומטית להקלטות Zoom ווידאו. תשתית **FastAPI** אסינכרונית, מתמלל באמצעות **Whisper AI (Large-v3)**, מזהה דוברים עם **Pyannote**, ומייצר סיכומים וחידונים עם **Google Gemini**.
 
 ---
 
@@ -38,7 +38,16 @@
 git clone https://github.com/asizi24/translator-from-zoom.git
 cd translator-from-zoom
 pip install -r requirements.txt
-python run_local.py
+uvicorn app:app --port 5000 --reload
+```
+
+## ✅ בדיקת תקינות (Verification)
+
+לאחר הפעלת השרת, ניתן להריץ בדיקת קצה-לקצה אוטומטית:
+
+```bash
+# בחלון טרמינל חדש:
+python verify_ui_e2e.py
 ```
 
 ### 🎮 יש לכם כרטיס NVIDIA? (12x יותר מהיר!)
@@ -151,7 +160,7 @@ export HF_TOKEN="your_token_here"
 ### הרצה
 
 ```bash
-python app.py
+uvicorn app:app --port 5000 --reload
 ```
 
 פתחו: **<http://localhost:5000>**
