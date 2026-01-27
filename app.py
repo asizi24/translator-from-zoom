@@ -86,6 +86,7 @@ templates = Jinja2Templates(directory="templates")
 # Models
 class UrlRequest(BaseModel):
     url: str
+    test_mode: bool = False
 
 class AskRequest(BaseModel):
     task_id: str
@@ -253,6 +254,27 @@ def process_audio_task(task_id: str, audio_blob_name: str, prompt_override: str 
             result_json = {"raw_text": result_text, "error": "Failed to parse structure"}
 
         # 3. Save Results
+        # --- Local Save ---
+        try:
+            save_dir = "saved_summaries"
+            os.makedirs(save_dir, exist_ok=True)
+            
+            # Extract basic filename from blob path (uploads/task_id_filename)
+            # We want just the filename part, maybe strip task_id if possible, but keep it simple
+            base_filename = os.path.basename(audio_blob_name)
+            
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            safe_filename = f"summary_{timestamp}_{base_filename}.txt"
+            local_path = os.path.join(save_dir, safe_filename)
+            
+            with open(local_path, "w", encoding="utf-8") as f:
+                f.write(result_text)
+                
+            logger.info(f"Saved summary locally to {local_path}")
+        except Exception as e:
+            logger.error(f"Failed to save locally: {e}")
+        # ------------------
+
         save_result_to_gcs(task_id, result_text)
         
         # 4. Optional: Cleanup Audio
@@ -277,7 +299,7 @@ def process_audio_task(task_id: str, audio_blob_name: str, prompt_override: str 
         status["error"] = str(e)
         save_task_status(task_id, status)
 
-def download_and_process_url(task_id: str, url: str):
+def download_and_process_url(task_id: str, url: str, test_mode: bool = False):
     """Background task for URL download -> Upload -> Process."""
     status = {
         "task_id": task_id,
@@ -288,6 +310,46 @@ def download_and_process_url(task_id: str, url: str):
     }
     save_task_status(task_id, status)
     
+    if test_mode:
+        logger.info(f"Task {task_id} running in TEST MODE")
+        # Simulate processing steps
+        time.sleep(2)
+        status["progress"] = 20
+        status["message"] = "Test Mode: Uploading..."
+        save_task_status(task_id, status)
+        
+        time.sleep(2)
+        status["progress"] = 50
+        status["message"] = "Test Mode: Processing..."
+        save_task_status(task_id, status)
+        
+        time.sleep(2)
+        status["status"] = "completed"
+        status["progress"] = 100
+        status["message"] = "Test Mode: Complete"
+        
+        # Mock Result
+        mock_result = {
+            "transcript_segments": [
+                {"speaker": "Test Speaker", "text": "This is a test transcript.", "timestamp": "00:01"}
+            ],
+            "summary": "This is a test summary.",
+            "topics": ["Test Topic 1", "Test Topic 2"],
+            "quiz": [
+                {
+                    "question": "Is this a test?",
+                    "options": ["Yes", "No"],
+                    "correct_index": 0,
+                    "explanation": "Because it is a test."
+                }
+            ],
+            "sentiment": "neutral"
+        }
+        status.update(mock_result)
+        save_task_status(task_id, status)
+        save_result_to_gcs(task_id, json.dumps(mock_result))
+        return
+
     safe_temp = os.environ.get("TEMP", "/tmp")
     audio_filename = f"audio_{task_id}.mp3"
     audio_path = os.path.join(safe_temp, audio_filename)
@@ -378,7 +440,7 @@ async def upload_file(background_tasks: BackgroundTasks, file: UploadFile = File
 async def start_url_processing(background_tasks: BackgroundTasks, request: UrlRequest):
     """Async URL processing endpoint."""
     task_id = str(uuid.uuid4())[:8]
-    background_tasks.add_task(download_and_process_url, task_id, request.url)
+    background_tasks.add_task(download_and_process_url, task_id, request.url, request.test_mode)
     return {"task_id": task_id, "status": "queued"}
 
 @app.get("/status/{task_id}")
@@ -494,3 +556,8 @@ async def create_direct(request: DirectTextRequest):
     save_task_status(task_id, status)
     
     return {"task_id": task_id, "status": "completed", "redirect_url": f"/player/{task_id}"}
+
+if __name__ == "__main__":
+    import uvicorn
+    # Run the app on port 8080 (Cloud Run default)
+    uvicorn.run(app, host="0.0.0.0", port=8080)

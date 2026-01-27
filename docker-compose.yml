@@ -11,6 +11,8 @@ services:
       - GOOGLE_APPLICATION_CREDENTIALS=/app/key.json
       - GOOGLE_CLOUD_PROJECT=${PROJECT_ID}
       - BUCKET_NAME=${BUCKET_NAME}
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      - HF_TOKEN=${HF_TOKEN}
     env_file:
       - .env
     volumes:

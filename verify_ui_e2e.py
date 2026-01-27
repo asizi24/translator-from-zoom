@@ -8,7 +8,7 @@ print("🚀 Starting End-to-End Verification")
 # 1. Submit Test Task
 print("1️⃣  Submitting test task via API...")
 try:
-    response = requests.post('http://localhost:5000/start', json={
+    response = requests.post('http://localhost:8000/start', json={
         'url': 'https://example.com/test_video.mp4',
         'test_mode': True
     })
@@ -25,7 +25,7 @@ try:
     print("2️⃣  Waiting for processing...")
     for i in range(10):
         time.sleep(1)
-        status_resp = requests.get(f'http://localhost:5000/status/{task_id}')
+        status_resp = requests.get(f'http://localhost:8000/status/{task_id}')
         status = status_resp.json()
         print(f"   Status: {status.get('status')} - {status.get('progress')}% - {status.get('message')}")
         
@@ -64,7 +64,7 @@ try:
     # webbrowser.open(f'http://localhost:5000/player/{task_id}')
     # Instead of webbrowser.open which might be ignored in this environment, 
     # we'll print the URL for the browser subagent
-    print(f"VERIFY_URL: http://localhost:5000/player/{task_id}")
+    print(f"VERIFY_URL: http://localhost:8000/player/{task_id}")
 
 except Exception as e:
     print(f"   ❌ Connection failed: {e}")
